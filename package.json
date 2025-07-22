@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://FatmaHossam5.github.io/quiz-app-github-pages/",
+  "homepage": "https://FatmaHossam5.github.io/quiz-app-github-pages",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
