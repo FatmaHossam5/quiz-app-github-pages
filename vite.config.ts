@@ -29,7 +29,7 @@ export default defineConfig({
             './src/Components/Login/Login.tsx',
             './src/Components/Register/Register.tsx',
             './src/Components/ChangePassword/ChangePassword.tsx',
-            './src/Components/RequsetResetPass/RequsetResetPass.tsx',
+            './src/Components/RequestResetPass/RequestResetPass.tsx',
             './src/Components/RestPassword/RestPassword.tsx',
           ],
           'quiz-components': [
