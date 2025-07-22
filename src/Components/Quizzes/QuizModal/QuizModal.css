@@ -1,0 +1,202 @@
+/* Custom styles for QuizModal component */
+
+/* Smooth form transitions */
+.quiz-modal-form {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced input focus states */
+.quiz-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+}
+
+/* Custom select styling */
+.quiz-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+/* Section header animations */
+.quiz-section-header {
+  position: relative;
+}
+
+.quiz-section-header::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  transition: width 0.3s ease;
+}
+
+.quiz-section-header:hover::after {
+  width: 100%;
+}
+
+/* Form validation animations */
+.quiz-error {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Loading state improvements */
+.quiz-loading {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Button hover effects */
+.quiz-button-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.quiz-button-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.quiz-button-primary:hover::before {
+  left: 100%;
+}
+
+/* Responsive grid improvements */
+@media (max-width: 768px) {
+  .quiz-grid-responsive {
+    grid-template-columns: 1fr;
+  }
+  
+  .quiz-section-spacing {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Form field grouping */
+.quiz-field-group {
+  position: relative;
+}
+
+.quiz-field-group:focus-within .quiz-field-label {
+  color: #3b82f6;
+  transform: translateY(-2px);
+}
+
+.quiz-field-label {
+  transition: all 0.2s ease;
+}
+
+/* Custom scrollbar for modal */
+.quiz-modal-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.quiz-modal-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.quiz-modal-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.quiz-modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Success state animations */
+.quiz-success {
+  animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Form section transitions */
+.quiz-section {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.quiz-section:nth-child(1) { animation-delay: 0.1s; }
+.quiz-section:nth-child(2) { animation-delay: 0.2s; }
+.quiz-section:nth-child(3) { animation-delay: 0.3s; }
+.quiz-section:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced accessibility */
+.quiz-focus-visible:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Mobile touch improvements */
+@media (max-width: 640px) {
+  .quiz-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .quiz-mobile-spacing {
+    padding: 1rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .quiz-dark-mode {
+    background-color: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .quiz-dark-mode .quiz-input {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+} 

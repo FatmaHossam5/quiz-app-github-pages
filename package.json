@@ -1,0 +1,53 @@
+{
+  "name": "-quiz-app-",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "homepage": "https://FatmaHossam5.github.io/quiz-app-github-pages/",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.5.1",
+    "@reduxjs/toolkit": "^2.1.0",
+    "axios": "^1.6.7",
+    "bootstrap": "^5.3.2",
+    "copy-to-clipboard": "^3.3.3",
+    "gh-pages": "^6.1.1",
+    "jwt-decode": "^4.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.50.0",
+    "react-pro-sidebar": "^1.1.0",
+    "react-redux": "^9.1.0",
+    "react-router-dom": "^6.21.3",
+    "react-select": "^5.8.0",
+    "react-social-login-buttons": "^3.9.1",
+    "react-toastify": "^10.0.4",
+    "react-window": "^1.8.11",
+    "react-window-infinite-loader": "^1.0.10",
+    "reactjs-social-login": "^2.6.3",
+    "typescript-cookie": "^1.0.6"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@types/react-window": "^1.8.8",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8"
+  }
+}
