@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
+import { RootState } from "../../types";
 
 export default function SideBar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const { userData } = useSelector((state: any) => state.userData);
+  const { userData } = useSelector((state: RootState) => state.userData);
   const { role } = userData?.profile || {};
   const location = useLocation();
 
@@ -54,6 +55,12 @@ export default function SideBar() {
         icon: "fa-solid fa-graduation-cap",
         path: "/dashboard/student",
         key: "students"
+      },
+      {
+        label: "Questions",
+        icon: "fa-solid fa-question-circle",
+        path: "/dashboard/questions",
+        key: "questions"
       }
     ] : []),
     {
@@ -98,7 +105,7 @@ export default function SideBar() {
       >
         <Menu
           menuItemStyles={{
-            button: ({ level, active, disabled }) => ({
+            button: ({ active, disabled }) => ({
               color: disabled ? '#9ca3af' : active ? '#8b5cf6' : '#374151',
               backgroundColor: active ? '#f3f4f6' : 'transparent',
               padding: '12px 16px',
@@ -172,7 +179,7 @@ export default function SideBar() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {userData?.profile?.name || 'User'}
+                  {userData?.profile?.role || 'User'}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
                   {role || 'Role'}

@@ -22,28 +22,32 @@ export const useMemoizedData = () => {
 
     // Sort by specified criteria
     return filtered.sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+      let aValue: string | number | Date;
+      let bValue: string | number | Date;
 
       switch (sortBy) {
-        case 'title':
+        case 'title': {
           aValue = a.title.toLowerCase();
           bValue = b.title.toLowerCase();
           break;
-        case 'date':
+        }
+        case 'date': {
           // Normalize quiz data to ensure schedule field is available
           const normalizedA = normalizeQuizData(a);
           const normalizedB = normalizeQuizData(b);
           aValue = new Date(normalizedA.schedule);
           bValue = new Date(normalizedB.schedule);
           break;
-        case 'status':
+        }
+        case 'status': {
           aValue = a.status;
           bValue = b.status;
           break;
-        default:
+        }
+        default: {
           aValue = a.title;
           bValue = b.title;
+        }
       }
 
       if (sortOrder === 'asc') {
@@ -73,25 +77,29 @@ export const useMemoizedData = () => {
 
     // Sort by specified criteria
     return filtered.sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+      let aValue: string | number;
+      let bValue: string | number;
 
       switch (sortBy) {
-        case 'name':
+        case 'name': {
           aValue = `${a.first_name} ${a.last_name}`.toLowerCase();
           bValue = `${b.first_name} ${b.last_name}`.toLowerCase();
           break;
-        case 'email':
+        }
+        case 'email': {
           aValue = a.email.toLowerCase();
           bValue = b.email.toLowerCase();
           break;
-        case 'score':
+        }
+        case 'score': {
           aValue = a.avg_score || 0;
           bValue = b.avg_score || 0;
           break;
-        default:
+        }
+        default: {
           aValue = a.first_name;
           bValue = b.first_name;
+        }
       }
 
       if (sortOrder === 'asc') {

@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 import { toast } from 'react-toastify';
@@ -8,6 +7,7 @@ import { baseUrl } from '../../../ApiUtils/ApiUtils';
 import Loading from '../../../Shared/Loading/Loading';
 import SharedModal from '../../../Shared/Modal/Modal';
 import { useNavigate } from 'react-router-dom';
+import { RootState, Submission } from '../../../types';
 
 interface Question {
   _id: string;
@@ -20,24 +20,18 @@ interface Question {
   };
 }
 
-interface Submission {
-  question: string;
-  answer: string;
-}
-
 export default function StudentsQuestion() {
   const { quizId } = useParams();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [quizName, setQuizName] = useState<string>("");
-  const { headers } = useSelector((state: any) => state.userData);
-  const { register } = useForm();
+  const { headers } = useSelector((state: RootState) => state.userData);
   const navigate = useNavigate();
   const [answers, setAnswers] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalState, setModalState] = useState("close");
 
-  const getQuestions = () => {
+  const getQuestions = useCallback(() => {
     setIsLoading(true);
     axios.get(`${baseUrl}/quiz/without-answers/${quizId}`, headers)
       .then((response) => {
@@ -50,7 +44,7 @@ export default function StudentsQuestion() {
       .finally(() => {
         setIsLoading(false);
       });
-  };
+  }, [quizId, headers]);
 
   const submitAnswers = () => {
     if (answers.length === 0) {
@@ -111,7 +105,7 @@ export default function StudentsQuestion() {
 
   useEffect(() => {
     getQuestions();
-  }, []);
+  }, [getQuestions]);
 
   return (
     <div className="min-h-screen bg-gray-50">

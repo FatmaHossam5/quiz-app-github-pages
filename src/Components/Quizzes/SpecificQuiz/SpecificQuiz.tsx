@@ -8,6 +8,7 @@ import Loading from "../../../Shared/Loading/Loading";
 import CodeModal from "../CodeModal/CodeModal";
 import QuizModal from "../QuizModal/QuizModal";
 import { normalizeQuizData } from "../../../utils/quizDataNormalizer";
+import { RootState } from "../../../types";
 
 export interface quiz {
   _id: string;
@@ -22,20 +23,20 @@ export interface quiz {
 
 export default function SpacificQuiz() {
   const { quizId } = useParams();
-  const { headers } = useSelector((state: any) => state.userData);
+  const { headers } = useSelector((state: RootState) => state.userData);
   const [quiz, setQuiz] = useState<quiz>();
   
   useEffect(() => {
     getData({ 
       path: `quiz/${quizId}`, 
       headers, 
-      setState: (data: any) => {
+      setState: (data: unknown) => {
         // Normalize the quiz data to handle field name mismatches
         const normalizedQuiz = normalizeQuizData(data);
         setQuiz(normalizedQuiz);
       }
     });
-  }, []);
+  }, [headers, quizId]);
 
   const [modalState, setModalState] = useState("close");
   const [code, setCode] = useState<string>("");
@@ -120,7 +121,9 @@ export default function SpacificQuiz() {
 
       <SharedModal
         show={modalState === "update"}
-        title="Update quiz"
+        title="Edit Quiz"
+        description="Update the quiz details below"
+        customIcon="fa-solid fa-file-circle-plus text-blue-600"
         onSave={() => {
           () => {};
         }}
@@ -142,7 +145,7 @@ export default function SpacificQuiz() {
         show={modalState === "quiz-code"}
         title=""
         onSave={() => {
-          console.log("hello");
+          // Save action
         }}
         omitHeader={true}
         onClose={handleClose}

@@ -6,26 +6,17 @@ import Loading from "../../Shared/Loading/Loading";
 import NoData from "../../Shared/NoData/NoData";
 import userImg from "../../assets/user img.png";
 import IncomingQuizzes from "../Quizzes/IncomingQuizzes/IncomingQuizzes";
-import StudentDataModal from "../Students/StudentDataModal/StudentDataModal";
-interface student {
-  email: string;
-  last_name: string;
-  first_name: string;
-  group: {
-    name: string;
-  };
-  _id: string;
-  avg_score: string;
-}
+import StudentDataModal, { StudentDataModalProp } from "../Students/StudentDataModal/StudentDataModal";
+import { RootState, User } from "../../types";
 
 export default function Home() {
   const [modalAction, setModalAction] = useState("close");
   const { incomingQuizzes, loading, error } = useSelector(
-    (state: any) => state.incomingQuizzes
+    (state: RootState) => state.incomingQuizzes
   );
   
   
-  let { students: topStudents } = useSelector((state: any) => state.students);
+  const { students: topStudents } = useSelector((state: RootState) => state.students);
   const { fetchedData: studentInfo, getData, isLoading } = useFetchData();
 
   const getStudentById = (studentId: string) => {
@@ -39,7 +30,7 @@ export default function Home() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
         <div className="max-w-7xl mx-auto">
           {/* Page Header */}
-          <div className="mb-8">
+          <div className="mb-4">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">Welcome back! Here's what's happening today.</p>
           </div>
@@ -48,7 +39,7 @@ export default function Home() {
             {/* Incoming Quizzes Section - Takes 2/3 of the width on XL screens */}
             <div className="xl:col-span-2">
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                   <i className="fa-solid fa-calendar-days text-blue-500 mr-3"></i>
                   Incoming Quizzes
                 </h2>
@@ -67,7 +58,7 @@ export default function Home() {
                 ) : incomingQuizzes && incomingQuizzes.length > 0 ? (
                   <IncomingQuizzes incomingQuizzes={incomingQuizzes} />
                 ) : (
-                  <div className="h-64 flex items-center justify-center">
+                  <div className=" flex items-center justify-center">
                     <NoData />
                   </div>
                 )}
@@ -77,7 +68,7 @@ export default function Home() {
             {/* Top Students Section - Takes 1/3 of the width on XL screens */}
             <div className="xl:col-span-1">
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                   <i className="fa-solid fa-trophy text-yellow-500 mr-3"></i>
                   Top 5 Students
                 </h2>
@@ -88,7 +79,7 @@ export default function Home() {
                       <Loading />
                     </div>
                   ) : topStudents.length > 0 ? (
-                    topStudents.map((student: student, id: number) => (
+                    topStudents.map((student: User, id: number) => (
                       <div key={id} className="group">
                         <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
                           <div className="flex items-center space-x-4">
@@ -159,7 +150,7 @@ export default function Home() {
         omitHeader={true}
         body={
           !isLoading ? (
-            <StudentDataModal studentInfo={studentInfo} />
+            <StudentDataModal studentInfo={studentInfo as StudentDataModalProp['studentInfo']} />
           ) : (
             <div className="flex items-center justify-center h-52">
               <Loading />

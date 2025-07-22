@@ -1,32 +1,33 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import Loading from "../../Shared/Loading/Loading";
 import AddQuestionModal from "./AddQuestionModal";
 import DeleteQuestionModal from "./DeleteQuestionModal";
 import UpdateQuestionModal from "./UpdateQuestionModal";
+import { RootState, Question } from "../../types";
 
 export default function Questions() {
-  const [questionsList, setQuestionsList] = useState([]);
+  const [questionsList, setQuestionsList] = useState<Question[]>([]);
   const [isloading, setIsLoading] = useState(false);
 
   //******** const modals add,update,delete*******//
   const [modalState, setModalState] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
   const [id, setId] = useState<string | null>(null);
-  const [question, setQuestion] = useState<any>(null);
+  const [question, setQuestion] = useState<Question | null>(null);
   const [questionTitle, setQuestionTitle] = useState<string>("");
 
   const handleAddModal = () => {
     setModalState("add");
     setIsOpen(true);
   };
-  const handleUpdateModal = (question: any) => {
+  const handleUpdateModal = (question: Question) => {
     setModalState("update");
     setQuestion(question);
     setIsOpen(true);
   };
-  const handleDeleteModal = (id: any, title: string) => {
+  const handleDeleteModal = (id: string, title: string) => {
     setModalState("delete");
     setId(id);
     setQuestionTitle(title);
@@ -36,10 +37,10 @@ export default function Questions() {
     setIsOpen(false);
   };
 
-  const { userData } = useSelector((state: any) => state.userData);
-  let reqHeaders = `Bearer ${userData?.accessToken}`;
+  const { userData } = useSelector((state: RootState) => state.userData);
+  const reqHeaders = `Bearer ${userData?.accessToken}`;
 
-  const getAllQuestions = () => {
+  const getAllQuestions = useCallback(() => {
     setIsLoading(true);
     axios
       .get(`https://upskilling-egypt.com:3005/api/question`, {
@@ -48,17 +49,17 @@ export default function Questions() {
       .then((response) => {
         setQuestionsList(response?.data);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         console.error("Error fetching questions:", error);
       })
       .finally(() => {
         setIsLoading(false);
       });
-  };
+  }, [reqHeaders]);
 
   useEffect(() => {
     getAllQuestions();
-  }, []);
+  }, [getAllQuestions]);
 
   // Helper function to get difficulty badge color
   const getDifficultyColor = (difficulty: string) => {
@@ -137,7 +138,7 @@ export default function Questions() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {questionsList.map((question: any, idx: number) => (
+                    {questionsList.map((question: Question, idx: number) => (
                       <tr
                         key={idx}
                         className="hover:bg-gray-50 transition-colors duration-150"
@@ -198,7 +199,7 @@ export default function Questions() {
               <div className="flex items-center">
                 <i className="fa-solid fa-chart-bar mr-2 text-green-500"></i>
                 <span>Categories: <span className="font-semibold text-gray-900">
-                  {new Set(questionsList.map((q: any) => q.type)).size}
+                  {new Set(questionsList.map((q: Question) => q.type)).size}
                 </span></span>
               </div>
             </div>

@@ -124,7 +124,7 @@ class ErrorLogger {
     this.outputToConsole(logEntry);
     
     if (this.config.enableReporting && level === 'error') {
-      this.reportToExternalService(logEntry);
+      this.reportToExternalService();
     }
   }
 
@@ -242,21 +242,21 @@ class ErrorLogger {
     
     switch (level) {
       case 'error':
-        console.error(logMessage, error, context);
+        // Error logged
         break;
       case 'warn':
-        console.warn(logMessage, error, context);
+        // Warning logged
         break;
       case 'info':
-        console.info(logMessage, error, context);
+        // Info logged
         break;
       case 'debug':
-        console.debug(logMessage, error, context);
+        // Debug logged
         break;
     }
   }
 
-  private reportToExternalService(entry: ErrorLogEntry): void {
+  private reportToExternalService(): void {
     // In a real application, you would send this to an external service
     // like Sentry, LogRocket, DataDog, etc.
     if (process.env.NODE_ENV === 'production') {

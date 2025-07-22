@@ -20,24 +20,10 @@ const incomingQuizzesSlice = createSlice({
   initialState,
   reducers: {
     setIncomingQuizzes: (state, action: PayloadAction<Quiz[]>) => {
-      console.log('🔍 [IncomingQuizzesSlice] setIncomingQuizzes action dispatched');
-      console.log('📊 [IncomingQuizzesSlice] Payload:', action.payload);
-      console.log('📊 [IncomingQuizzesSlice] Payload type:', typeof action.payload);
-      console.log('📊 [IncomingQuizzesSlice] Is array:', Array.isArray(action.payload));
-      console.log('📊 [IncomingQuizzesSlice] Payload length:', Array.isArray(action.payload) ? action.payload.length : 'Not an array');
-      
       state.incomingQuizzes = action.payload;
       state.loading = false;
       state.error = null;
       state.lastFetched = Date.now();
-      
-      console.log('✅ [IncomingQuizzesSlice] State updated successfully');
-      console.log('📊 [IncomingQuizzesSlice] New state:', {
-        incomingQuizzes: state.incomingQuizzes,
-        loading: state.loading,
-        error: state.error,
-        lastFetched: state.lastFetched
-      });
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;

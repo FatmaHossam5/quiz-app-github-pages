@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { baseUrl } from "../../ApiUtils/ApiUtils";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
+import { RootState } from "../../types";
 import Loading from "../../Shared/Loading/Loading";
 import ErrorMessage from "../../Shared/ErrorMessage/ErrorMessage";
 import Select from "react-select";
@@ -39,8 +40,18 @@ interface ValidationErrors {
   students?: string;
 }
 
+// React Select style types
+interface SelectStyles {
+  control: (provided: React.CSSProperties) => React.CSSProperties;
+  menu: (provided: React.CSSProperties) => React.CSSProperties;
+  menuPortal: (provided: React.CSSProperties) => React.CSSProperties;
+  multiValue: (provided: React.CSSProperties) => React.CSSProperties;
+  multiValueLabel: (provided: React.CSSProperties) => React.CSSProperties;
+  multiValueRemove: (provided: React.CSSProperties) => React.CSSProperties;
+}
+
 export default function AddGroup({ getGroups, isOpen, onClose }: AddGroupProps) {
-  const { headers } = useSelector((state: any) => state.userData);
+  const { headers } = useSelector((state: RootState) => state.userData);
   const [studentsList, setStudentsList] = useState<Student[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<Option[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,12 +61,11 @@ export default function AddGroup({ getGroups, isOpen, onClose }: AddGroupProps) 
   const {
     register,
     handleSubmit,
-    setValue,
     reset,
     formState: { errors },
   } = useForm<FormData>();
 
-  const getStudents = async () => {
+  const getStudents = useCallback(async () => {
     setIsLoading(true);
     try {
       // Use the endpoint that returns only students without groups
@@ -70,21 +80,21 @@ export default function AddGroup({ getGroups, isOpen, onClose }: AddGroupProps) 
         toast.error("No students available without groups.");
         setStudentsList([]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching students without groups:", error);
-      const errorMessage = error?.response?.data?.message || "Failed to load students without groups. Please try again.";
+      const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to load students without groups. Please try again.";
       toast.error(errorMessage);
       setStudentsList([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [headers]);
 
   useEffect(() => {
     if (isOpen) {
       getStudents();
     }
-  }, [isOpen]);
+  }, [isOpen, getStudents]);
 
   // Transform students list to select options
   const studentOptions: Option[] = studentsList
@@ -97,7 +107,7 @@ export default function AddGroup({ getGroups, isOpen, onClose }: AddGroupProps) 
   console.log("Student options:", studentOptions); // Debug log
 
   // Simplified change handler - removed complex types
-  const handleStudentChange = (selectedOptions: any) => {
+  const handleStudentChange = (selectedOptions: Option[] | null) => {
     const options = selectedOptions ? [...selectedOptions] : [];
     setSelectedStudents(options);
     
@@ -107,7 +117,7 @@ export default function AddGroup({ getGroups, isOpen, onClose }: AddGroupProps) 
     }
   };
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: FormData) => {
     // Validate students selection
     if (selectedStudents.length === 0) {
       setValidationErrors({ students: "Please select at least one student" });
@@ -132,17 +142,17 @@ export default function AddGroup({ getGroups, isOpen, onClose }: AddGroupProps) 
       setValidationErrors({});
       onClose();
       getGroups();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating group:", error);
-      toast.error(error?.response?.data?.message || "Failed to create group. Please try again.");
+      toast.error((error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to create group. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // Custom styles for react-select to match project design
-  const selectStyles = {
-    control: (provided: any) => ({
+  const selectStyles: SelectStyles = {
+    control: (provided: React.CSSProperties) => ({
       ...provided,
       border: '1px solid #d1d5db',
       borderRadius: '0.375rem 0.75rem 0.75rem 0.375rem',
@@ -156,25 +166,25 @@ export default function AddGroup({ getGroups, isOpen, onClose }: AddGroupProps) 
         boxShadow: '0 0 0 1px #6366f1',
       },
     }),
-    menu: (provided: any) => ({
+    menu: (provided: React.CSSProperties) => ({
       ...provided,
       zIndex: 9999,
     }),
-    menuPortal: (provided: any) => ({
+    menuPortal: (provided: React.CSSProperties) => ({
       ...provided,
       zIndex: 9999,
     }),
-    multiValue: (provided: any) => ({
+    multiValue: (provided: React.CSSProperties) => ({
       ...provided,
       backgroundColor: '#f3f4f6',
       borderRadius: '0.375rem',
     }),
-    multiValueLabel: (provided: any) => ({
+    multiValueLabel: (provided: React.CSSProperties) => ({
       ...provided,
       color: '#374151',
       fontSize: '0.875rem',
     }),
-    multiValueRemove: (provided: any) => ({
+    multiValueRemove: (provided: React.CSSProperties) => ({
       ...provided,
       color: '#6b7280',
       '&:hover': {

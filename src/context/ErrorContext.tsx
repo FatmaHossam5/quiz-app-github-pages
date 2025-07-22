@@ -1,14 +1,7 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { 
-  AppError, 
-  ErrorReport, 
-  GlobalErrorState, 
-  ErrorContextValue, 
-  ErrorHandlerConfig,
-  ErrorType,
-  ErrorSeverity
-} from '../types/errors';
+import React, { createContext, useReducer, useEffect, ReactNode } from 'react';
+import { ErrorType, ErrorSeverity, AppError, GlobalErrorState, ErrorHandlerConfig, ErrorContextValue, ErrorReport } from '../types/errors';
 import { errorLogger } from '../services/errorLogger';
+import { generateErrorId } from './ErrorContextUtils';
 
 // Action types for error reducer
 type ErrorAction = 
@@ -47,11 +40,10 @@ function errorReducer(state: GlobalErrorState, action: ErrorAction): GlobalError
         id: errorId,
         error,
         errorInfo,
-        context: error.context || {
+        context: {
           timestamp: Date.now(),
-          url: window.location.href,
-          userAgent: navigator.userAgent,
-          route: window.location.pathname
+          route: window.location.pathname,
+          userAgent: navigator.userAgent
         },
         resolved: false,
         reportedAt: Date.now()
@@ -297,82 +289,5 @@ export const ErrorProvider: React.FC<ErrorProviderProps> = ({
   );
 };
 
-// Custom hook to use error context
-export const useErrorContext = (): ErrorContextValue => {
-  const context = useContext(ErrorContext);
-  if (!context) {
-    throw new Error('useErrorContext must be used within an ErrorProvider');
-  }
-  return context;
-};
-
-// Custom hook for error reporting
-export const useErrorReporting = () => {
-  const { reportError } = useErrorContext();
-
-  const reportNetworkError = (message: string, statusCode?: number) => {
-    const error = errorLogger.createError(message, {
-      type: ErrorType.NETWORK_ERROR,
-      severity: ErrorSeverity.HIGH,
-      statusCode,
-      recoverable: true
-    });
-    reportError(error);
-  };
-
-  const reportAuthError = (message: string) => {
-    const error = errorLogger.createError(message, {
-      type: ErrorType.AUTHENTICATION_ERROR,
-      severity: ErrorSeverity.HIGH,
-      recoverable: false
-    });
-    reportError(error);
-  };
-
-  const reportValidationError = (message: string, field?: string) => {
-    const error = errorLogger.createError(message, {
-      type: ErrorType.VALIDATION_ERROR,
-      severity: ErrorSeverity.MEDIUM,
-      recoverable: true,
-      context: {
-        timestamp: Date.now(),
-        additionalData: { field }
-      }
-    });
-    reportError(error);
-  };
-
-  const reportQuizError = (message: string, quizId?: string) => {
-    const error = errorLogger.createError(message, {
-      type: ErrorType.QUIZ_ERROR,
-      severity: ErrorSeverity.MEDIUM,
-      recoverable: true,
-      context: {
-        timestamp: Date.now(),
-        additionalData: { quizId }
-      }
-    });
-    reportError(error);
-  };
-
-  const reportUnexpectedError = (originalError: Error) => {
-    const error = errorLogger.transformError(originalError);
-    reportError(error);
-  };
-
-  return {
-    reportError,
-    reportNetworkError,
-    reportAuthError,
-    reportValidationError,
-    reportQuizError,
-    reportUnexpectedError
-  };
-};
-
-// Utility function to generate error IDs
-function generateErrorId(): string {
-  return `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
-
+export { ErrorContext };
 export default ErrorContext; 

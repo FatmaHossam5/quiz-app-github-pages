@@ -9,13 +9,7 @@ interface IncomingQuizzesProps {
 export default function IncomingQuizzes({ incomingQuizzes }: IncomingQuizzesProps) {
   const location = useLocation();
   
-  console.log('🔍 [IncomingQuizzes Component] Component rendered');
-  console.log('📊 [IncomingQuizzes Component] Props received:', { incomingQuizzes });
-  console.log('📊 [IncomingQuizzes Component] incomingQuizzes type:', typeof incomingQuizzes);
-  console.log('📊 [IncomingQuizzes Component] Is array:', Array.isArray(incomingQuizzes));
-  console.log('📊 [IncomingQuizzes Component] Length:', Array.isArray(incomingQuizzes) ? incomingQuizzes.length : 'Not an array');
-  console.log('📊 [IncomingQuizzes Component] Full data:', incomingQuizzes);
-  console.log('📊 [IncomingQuizzes Component] Location pathname:', location.pathname);
+
   
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

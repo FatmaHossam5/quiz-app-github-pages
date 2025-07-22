@@ -7,25 +7,16 @@ import useFetchData from "../../ApiUtils/useFetchData";
 import Label from "../../Shared/Label/Label";
 import Loading from "../../Shared/Loading/Loading";
 import SharedModal from "../../Shared/Modal/Modal";
-import trash from "../../assets/Email (1).png";
 import userImg from "../../assets/user img.png";
 import { studentInfo } from "../Students/Students";
+import { RootState, Group } from "../../types";
 
 interface StudentCard {
   student: studentInfo;
   getGroups: () => void;
   activeGroupId: string;
   getGroupById: (id: string) => void;
-  groups: group[];
-}
-
-interface group {
-  _id: string;
-  name: string;
-  students?: object[];
-  status?: string;
-  max_students?: string;
-  instructor?: string;
+  groups: Group[];
 }
 
 export default function StudentCard({
@@ -38,7 +29,7 @@ export default function StudentCard({
   
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom');
-  const { headers } = useSelector((state: any) => state.userData);
+  const { headers } = useSelector((state: RootState) => state.userData);
   const [studentId, setStudentId] = useState<string>("close");
   const [modalState, setModalState] = useState<string>("close");
   const { fetchedData: studentData, getData, isLoading } = useFetchData();
@@ -88,7 +79,7 @@ export default function StudentCard({
     setModalState("Edit");
   };
 
-  const [isUpdating, setIsUpdating] = useState(false);
+
 
   const handleUpdate = () => {
     if (!groupId) {
@@ -102,24 +93,18 @@ export default function StudentCard({
       return;
     }
     
-    setIsUpdating(true);
-    
     axios
       .put(
         `https://upskilling-egypt.com:3005/api/student/${studentId}/${groupId}`, {}, headers
       )
-      .then((res) => {
+      .then(() => {
         getGroupById(activeGroupId);
         toast.success(`Successfully moved ${student.first_name} to ${groups.find(g => g._id === groupId)?.name}`);
         closeModal();
         setGroupId(""); // Reset selection
       })
       .catch((err) => {
-        console.log(headers);
         toast.error(err.response?.data?.message || "Failed to update student group");
-      })
-      .finally(() => {
-        setIsUpdating(false);
       });
   };
 

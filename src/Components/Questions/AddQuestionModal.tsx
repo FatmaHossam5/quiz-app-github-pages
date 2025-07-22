@@ -5,23 +5,43 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Loading from "../../Shared/Loading/Loading";
 import SharedModal from "../../Shared/Modal/Modal";
+import { RootState } from "../../types";
+
+interface AddQuestionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  getAllQuestions: () => void;
+}
+
+interface QuestionFormData {
+  title: string;
+  description: string;
+  options: {
+    A: string;
+    B: string;
+    C: string;
+    D: string;
+  };
+  answer: 'A' | 'B' | 'C' | 'D';
+  difficulty: 'easy' | 'medium' | 'hard';
+  type: 'FE' | 'BE' | 'FS';
+}
 
 export default function AddQuestionModal({
   isOpen,
   onClose,
   getAllQuestions,
-}: any) {
+}: AddQuestionModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
     reset,
-  } = useForm();
-  const { headers } = useSelector((state: any) => state.userData);
+  } = useForm<QuestionFormData>();
+  const { headers } = useSelector((state: RootState) => state.userData);
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: QuestionFormData) => {
     setIsLoading(true);
     axios
       .post(`https://upskilling-egypt.com:3005/api/question`, data, headers)
@@ -31,8 +51,9 @@ export default function AddQuestionModal({
         onClose();
         getAllQuestions();
       })
-      .catch((error) => {
-        toast.error(error?.response?.data?.message || "Failed to add question");
+      .catch((error: unknown) => {
+        const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to add question";
+        toast.error(errorMessage);
       })
       .finally(() => {
         setIsLoading(false);
@@ -127,9 +148,9 @@ export default function AddQuestionModal({
                         placeholder={`Enter option ${option}`}
                         className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                       />
-                      {errors.options && (errors.options as any)[option] && (
+                      {errors.options && (errors.options as Record<string, { message?: string }>)[option] && (
                         <p className="mt-1 text-xs text-red-600">
-                          {String((errors.options as any)[option]?.message)}
+                          {String((errors.options as Record<string, { message?: string }>)[option]?.message)}
                         </p>
                       )}
                     </div>

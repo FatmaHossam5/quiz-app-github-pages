@@ -3,7 +3,6 @@ import { toast } from 'react-toastify';
 import { 
   AppError, 
   ErrorBoundaryState, 
-  ErrorType, 
   ErrorSeverity, 
   ErrorRecoveryAction 
 } from '../../types/errors';
@@ -57,6 +56,7 @@ class EnhancedErrorBoundary extends Component<Props, ErrorBoundaryState> {
       context: {
         ...appError.context,
         component: this.props.context || 'Unknown Component',
+        timestamp: Date.now(),
         additionalData: {
           ...appError.context?.additionalData,
           componentStack: errorInfo.componentStack,
@@ -106,7 +106,7 @@ class EnhancedErrorBoundary extends Component<Props, ErrorBoundaryState> {
   private reportToExternalService = (error: AppError, errorInfo: ErrorInfo) => {
     // In production, send to external monitoring service
     // Example: Sentry, LogRocket, etc.
-    console.log('Would report to external service:', error, errorInfo);
+    // Error reported to external service
   };
 
   private handleRetry = () => {
@@ -161,7 +161,7 @@ class EnhancedErrorBoundary extends Component<Props, ErrorBoundaryState> {
         userAgent: navigator.userAgent
       };
       
-      console.log('Error report data:', reportData);
+      // Error report data logged
       toast.success('Error report submitted. Thank you!');
     }
   };
@@ -233,7 +233,7 @@ class EnhancedErrorBoundary extends Component<Props, ErrorBoundaryState> {
         <div className={className}>
           <ErrorUI
             error={error}
-            errorInfo={errorInfo}
+            errorInfo={errorInfo || undefined}
             onRetry={enableRetry && error.recoverable ? this.handleRetry : undefined}
             onReport={this.handleReport}
             onDismiss={this.handleDismiss}

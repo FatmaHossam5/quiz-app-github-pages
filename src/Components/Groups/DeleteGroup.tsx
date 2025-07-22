@@ -4,6 +4,7 @@ import Loading from "../../Shared/Loading/Loading";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { baseUrl } from '../../ApiUtils/ApiUtils';
+import { RootState } from "../../types";
 
 interface DeleteGroupProps {
   getGroups: () => void;
@@ -14,7 +15,7 @@ interface DeleteGroupProps {
 }
 
 export default function DeleteGroup({ getGroups, isOpen, onClose, id, groupName }: DeleteGroupProps) {
-  const { headers } = useSelector((state: any) => state.userData);
+  const { headers } = useSelector((state: RootState) => state.userData);
   const [isLoading, setIsLoading] = useState(false);
 
   const deleteGroup = async () => {
@@ -24,8 +25,9 @@ export default function DeleteGroup({ getGroups, isOpen, onClose, id, groupName 
       toast.success(response?.data?.message || "Group deleted successfully");
       onClose();
       getGroups();
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Error deleting group");
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Error deleting group";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

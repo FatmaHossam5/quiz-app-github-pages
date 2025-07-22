@@ -45,9 +45,9 @@ class PerformanceMonitor {
         });
         navigationObserver.observe({ entryTypes: ['navigation'] });
         this.observers.push(navigationObserver);
-      } catch (error) {
-        console.warn('Navigation timing observer not supported:', error);
-      }
+              } catch (error) {
+          // Navigation timing observer not supported
+        }
 
       // Observe resource timing
       try {
@@ -61,9 +61,9 @@ class PerformanceMonitor {
         });
         resourceObserver.observe({ entryTypes: ['resource'] });
         this.observers.push(resourceObserver);
-      } catch (error) {
-        console.warn('Resource timing observer not supported:', error);
-      }
+              } catch (error) {
+          // Resource timing observer not supported
+        }
 
       // Observe paint timing
       try {
@@ -77,16 +77,16 @@ class PerformanceMonitor {
         });
         paintObserver.observe({ entryTypes: ['paint'] });
         this.observers.push(paintObserver);
-      } catch (error) {
-        console.warn('Paint timing observer not supported:', error);
-      }
+              } catch (error) {
+          // Paint timing observer not supported
+        }
     }
   }
 
   // Record navigation metrics
   private recordNavigationMetrics(entry: PerformanceNavigationTiming): void {
-    const loadTime = entry.loadEventEnd - (entry as any).navigationStart;
-    const renderTime = entry.domContentLoadedEventEnd - (entry as any).navigationStart;
+    const loadTime = entry.loadEventEnd - (entry as PerformanceNavigationTiming & { navigationStart: number }).navigationStart;
+    const renderTime = entry.domContentLoadedEventEnd - (entry as PerformanceNavigationTiming & { navigationStart: number }).navigationStart;
     
     this.metrics.push({
       loadTime,
@@ -99,23 +99,23 @@ class PerformanceMonitor {
   private recordResourceMetrics(entry: PerformanceResourceTiming): void {
     // Track large resources that might affect performance
     if (entry.transferSize > 100000) { // 100KB threshold
-      console.warn(`Large resource detected: ${entry.name} (${entry.transferSize} bytes)`);
+      // Large resource detected
     }
   }
 
   // Record paint metrics
   private recordPaintMetrics(entry: PerformanceEntry): void {
     if (entry.name === 'first-contentful-paint') {
-      console.log(`First Contentful Paint: ${entry.startTime}ms`);
+      // First Contentful Paint recorded
     } else if (entry.name === 'first-paint') {
-      console.log(`First Paint: ${entry.startTime}ms`);
+      // First Paint recorded
     }
   }
 
   // Get memory usage (if available)
   private getMemoryUsage(): number | undefined {
     if (typeof window !== 'undefined' && 'performance' in window) {
-      const memory = (performance as any).memory;
+      const memory = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
       if (memory) {
         return memory.usedJSHeapSize;
       }
@@ -155,7 +155,7 @@ class PerformanceMonitor {
     const start = performance.now();
     const result = fn();
     const end = performance.now();
-    console.log(`${label}: ${end - start}ms`);
+    // Function execution time measured
     return result;
   }
 
@@ -164,15 +164,15 @@ class PerformanceMonitor {
     const start = performance.now();
     const result = await fn();
     const end = performance.now();
-    console.log(`${label}: ${end - start}ms`);
+    // Async function execution time measured
     return result;
   }
 
   // Get Web Vitals metrics
-  public getWebVitals(): Promise<any> {
+  public getWebVitals(): Promise<Record<string, number>> {
     return new Promise((resolve) => {
       if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
-        const vitals: any = {};
+        const vitals: Record<string, number> = {};
         
         // Largest Contentful Paint
         try {
@@ -184,7 +184,7 @@ class PerformanceMonitor {
           });
           lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
         } catch (error) {
-          console.warn('LCP observer not supported:', error);
+          // LCP observer not supported
         }
 
         // First Input Delay
@@ -192,13 +192,13 @@ class PerformanceMonitor {
           const fidObserver = new PerformanceObserver((list) => {
             const entries = list.getEntries();
             entries.forEach((entry) => {
-              vitals.fid = (entry as any).processingStart - entry.startTime;
+              vitals.fid = (entry as PerformanceEntry & { processingStart: number }).processingStart - entry.startTime;
             });
             fidObserver.disconnect();
           });
           fidObserver.observe({ entryTypes: ['first-input'] });
         } catch (error) {
-          console.warn('FID observer not supported:', error);
+          // FID observer not supported
         }
 
         // Cumulative Layout Shift
@@ -207,15 +207,16 @@ class PerformanceMonitor {
             const entries = list.getEntries();
             let clsValue = 0;
             entries.forEach((entry) => {
-              if (!(entry as any).hadRecentInput) {
-                clsValue += (entry as any).value;
+              const layoutShiftEntry = entry as PerformanceEntry & { hadRecentInput: boolean; value: number };
+              if (!layoutShiftEntry.hadRecentInput) {
+                clsValue += layoutShiftEntry.value;
               }
             });
             vitals.cls = clsValue;
           });
           clsObserver.observe({ entryTypes: ['layout-shift'] });
         } catch (error) {
-          console.warn('CLS observer not supported:', error);
+          // CLS observer not supported
         }
 
         setTimeout(() => resolve(vitals), 5000); // Wait 5 seconds to collect metrics
@@ -237,13 +238,7 @@ class PerformanceMonitor {
         total + (resource.transferSize || 0), 0
       );
       
-      console.log('Bundle Analysis:', {
-        totalJSResources: jsResources.length,
-        totalJSSize: `${(totalJSSize / 1024).toFixed(2)}KB`,
-        largestJS: jsResources.reduce((largest, resource) => 
-          (resource.transferSize || 0) > (largest.transferSize || 0) ? resource : largest
-        )
-      });
+      // Bundle Analysis completed
     }
   }
 

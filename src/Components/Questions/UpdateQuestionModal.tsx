@@ -5,8 +5,30 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Loading from '../../Shared/Loading/Loading';
 import SharedModal from "../../Shared/Modal/Modal";
+import { RootState, Question } from "../../types";
 
-export default function UpdateQuestionModal({ isOpen, onClose, getAllQuestions, question }:any) {
+interface UpdateQuestionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  getAllQuestions: () => void;
+  question: Question;
+}
+
+interface QuestionFormData {
+  title: string;
+  description: string;
+  options: {
+    A: string;
+    B: string;
+    C: string;
+    D: string;
+  };
+  answer: 'A' | 'B' | 'C' | 'D';
+  difficulty: 'easy' | 'medium' | 'hard';
+  type: 'FE' | 'BE' | 'FS';
+}
+
+export default function UpdateQuestionModal({ isOpen, onClose, getAllQuestions, question }: UpdateQuestionModalProps) {
 
   const [isLoading, setIsLoading] = useState(false);
   const {
@@ -14,10 +36,10 @@ export default function UpdateQuestionModal({ isOpen, onClose, getAllQuestions, 
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm();
+  } = useForm<QuestionFormData>();
 
-  const { userData } = useSelector((state: any) => state.userData);
-  let reqHeaders=`Bearer ${userData?.accessToken}`
+  const { userData } = useSelector((state: RootState) => state.userData);
+  const reqHeaders = `Bearer ${userData?.accessToken}`;
 
   useEffect(() => {
     setValue("title", question.title);
@@ -31,7 +53,7 @@ export default function UpdateQuestionModal({ isOpen, onClose, getAllQuestions, 
     setValue("type", question.type);
   }, [question, setValue])
 
-  const onSubmit = (data:any) => {
+  const onSubmit = (data: QuestionFormData) => {
     setIsLoading(true);
     axios
     .put(`https://upskilling-egypt.com:3005/api/question/${question._id}`, data, {
@@ -41,10 +63,10 @@ export default function UpdateQuestionModal({ isOpen, onClose, getAllQuestions, 
       toast.success(response?.data.message || "Question updated successfully");
       
     })
-    .catch((error) => {
+    .catch((error: unknown) => {
       console.log(error);
-      
-      toast.error(error?.response?.data?.message || "Error updating question");
+      const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Error updating question";
+      toast.error(errorMessage);
     })
     .finally(() => {
       setIsLoading(false);
@@ -137,9 +159,9 @@ export default function UpdateQuestionModal({ isOpen, onClose, getAllQuestions, 
                         placeholder={`Enter option ${option}`}
                         className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                       />
-                      {errors.options && (errors.options as any)[option] && (
+                      {errors.options && (errors.options as Record<string, { message?: string }>)[option] && (
                         <p className="mt-1 text-xs text-red-600">
-                          {String((errors.options as any)[option]?.message)}
+                          {String((errors.options as Record<string, { message?: string }>)[option]?.message)}
                         </p>
                       )}
                     </div>

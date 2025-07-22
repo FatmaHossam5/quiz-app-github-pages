@@ -134,15 +134,15 @@ export const VirtualizedList = memo(VirtualizedListComponent) as <T>(
 ) => JSX.Element;
 
 // Specific virtualized list components for different data types
-export const VirtualizedQuizList = memo(forwardRef<any, VirtualizedListProps<Quiz>>((props, ref) => (
+export const VirtualizedQuizList = memo(forwardRef<unknown, VirtualizedListProps<Quiz>>((props) => (
   <VirtualizedList {...props} />
 )));
 
-export const VirtualizedStudentList = memo(forwardRef<any, VirtualizedListProps<User>>((props, ref) => (
+export const VirtualizedStudentList = memo(forwardRef<unknown, VirtualizedListProps<User>>((props) => (
   <VirtualizedList {...props} />
 )));
 
-export const VirtualizedQuestionList = memo(forwardRef<any, VirtualizedListProps<Question>>((props, ref) => (
+export const VirtualizedQuestionList = memo(forwardRef<unknown, VirtualizedListProps<Question>>((props) => (
   <VirtualizedList {...props} />
 )));
 

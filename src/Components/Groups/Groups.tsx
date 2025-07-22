@@ -2,24 +2,24 @@ import DeleteGroup from "./DeleteGroup";
 import AddGroup from "./AddGroup";
 import UpdateGroup from "./UpdateGroup";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import Loading from "../../Shared/Loading/Loading";
 import { baseUrl } from "../../ApiUtils/ApiUtils";
 import NoData from "../../Shared/NoData/NoData";
 import { toast } from "react-toastify";
+import { RootState, Group } from "../../types";
 
 export default function Groups() {
-  const [groupsList, setGroupsList] = useState([]);
+  const [groupsList, setGroupsList] = useState<Group[]>([]);
   const [isloading, setIsLoading] = useState(false);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const { headers } = useSelector((state: any) => state.userData);
+  const { headers } = useSelector((state: RootState) => state.userData);
 
   //******** const modals add,update,delete*******//
   const [modalState, setModalState] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
   const [id, setId] = useState<string | number | null>(null);
-  const [group, setGroup] = useState(null);
+  const [group, setGroup] = useState<Group | null>(null);
   const [groupName, setGroupName] = useState<string>("");
 
   const handleAddModal = () => {
@@ -27,13 +27,13 @@ export default function Groups() {
     setIsOpen(true);
   };
 
-  const handleUpdateModal = (group: any) => {
+  const handleUpdateModal = (group: Group) => {
     setModalState("update");
     setGroup(group);
     setIsOpen(true);
   };
 
-  const handleDeleteModal = (group: any) => {
+  const handleDeleteModal = (group: Group) => {
     setModalState("delete");
     setId(group._id);
     setGroupName(group.name);
@@ -49,22 +49,23 @@ export default function Groups() {
   };
 
   //*****to get all groups******* */
-  const getGroups = async () => {
+  const getGroups = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(`${baseUrl}/group`, headers);
       setGroupsList(response.data);
-    } catch (err: any) {
-      console.log(err);
-      toast.error(err?.response?.data?.message || "Failed to fetch groups");
+    } catch (error: unknown) {
+      console.log(error);
+      const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to fetch groups";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [headers]);
 
   useEffect(() => {
     getGroups();
-  }, []);
+  }, [getGroups]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -135,7 +136,7 @@ export default function Groups() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {groupsList.map((group: any) => (
+                {groupsList.map((group: Group) => (
                   <div 
                     key={group?._id} 
                     className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-200 hover:border-gray-300"
@@ -158,34 +159,24 @@ export default function Groups() {
                       <div className="flex items-center space-x-2 ml-4">
                         <button
                           onClick={() => handleUpdateModal(group)}
-                          disabled={actionLoading === `edit-${group._id}`}
                           className="inline-flex items-center p-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                           aria-label={`Edit ${group?.name}`}
                           title="Edit group"
                         >
-                          {actionLoading === `edit-${group._id}` ? (
-                            <Loading />
-                          ) : (
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          )}
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
                         </button>
 
                         <button
                           onClick={() => handleDeleteModal(group)}
-                          disabled={actionLoading === `delete-${group._id}`}
                           className="inline-flex items-center p-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                           aria-label={`Delete ${group?.name}`}
                           title="Delete group"
                         >
-                          {actionLoading === `delete-${group._id}` ? (
-                            <Loading />
-                          ) : (
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          )}
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
                         </button>
                       </div>
                     </div>

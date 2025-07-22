@@ -1,32 +1,25 @@
 import { Link } from "react-router-dom";
+import { Quiz } from "../../../types";
 
 interface CompletedQuizzes {
-  completedQuizzes: object[];
+  completedQuizzes: Quiz[];
 }
 
 export default function CompletedQuizzes({
   completedQuizzes,
 }: CompletedQuizzes) {
-  
-
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      {/* Header with better styling */}
-      <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-              <i className="fa-solid fa-check-circle text-green-600 text-sm"></i>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900">Completed Quizzes</h3>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Completed Quizzes</h3>
+            <p className="text-sm text-gray-500">Recently completed quizzes</p>
           </div>
-          <Link
-            to="/dashboard/results"
-            className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-          >
-            View Results
-            <i className="fa-solid fa-arrow-right ml-2 text-xs"></i>
-          </Link>
+          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+            <i className="fa-solid fa-check text-green-600"></i>
+          </div>
         </div>
       </div>
 
@@ -65,7 +58,7 @@ export default function CompletedQuizzes({
                   <tbody className="bg-white divide-y divide-gray-200">
                     {completedQuizzes
                       .slice(0, 3)
-                      .map((result: any, idx: number) => (
+                      .map((result: Quiz, idx: number) => (
                         <tr key={idx} className="hover:bg-gray-50 transition-colors duration-150">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">{result.title}</div>
@@ -92,7 +85,7 @@ export default function CompletedQuizzes({
             <div className="md:hidden space-y-4">
               {completedQuizzes
                 .slice(0, 3)
-                .map((result: any, idx: number) => (
+                .map((result: Quiz, idx: number) => (
                   <div key={idx} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <div className="flex justify-between items-start mb-2">
                       <h4 className="text-sm font-medium text-gray-900 line-clamp-1">{result.title}</h4>

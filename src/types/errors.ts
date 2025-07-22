@@ -33,7 +33,7 @@ export interface ErrorContext {
   timestamp: number;
   userAgent?: string;
   url?: string;
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
 }
 
 export interface AppError extends Error {

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { baseUrl } from "../../ApiUtils/ApiUtils";
@@ -8,6 +8,7 @@ import SharedModal from "../../Shared/Modal/Modal";
 import NoData from "../../Shared/NoData/NoData";
 import AddStudentToGroup from "./AddStudentToGroup/AddStudentToGroup";
 import StudentCard from "../StudentCard/StudentCard";
+import { RootState, Group } from "../../types";
 
 export interface studentInfo {
   email: string;
@@ -21,19 +22,70 @@ export interface studentInfo {
 }
 
 export default function Students() {
-  const { headers } = useSelector((state: any) => state.userData);
+  const { headers } = useSelector((state: RootState) => state.userData);
   const [modalAction, setModalAction] = useState("close");
-  const [userId, setUserId] = useState("");
-  const [groups, setGroup] = useState(new Array());
+  const [userId, setUserId] = useState<string>("");
+  const [groups, setGroup] = useState<Group[]>([]);
   const [groupId, setGroupId] = useState<string>();
-  const [activeGroupId, setActiveGroupId] = useState(groups[0]?._id);
+  const [activeGroupId, setActiveGroupId] = useState<string>();
+  const [students, setStudents] = useState<studentInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleOpenModal = (action: string) => {
     setModalAction(action);
   };
-  const closeModal = () => setModalAction("close");
+  
+  const closeModal = useCallback(() => setModalAction("close"), []);
 
-  const getGroups = () => {
+  const getStudentsFromGroup = useCallback((id: string) => {
+    axios
+      .get(`${baseUrl}/group/${id}`, headers)
+      .then((res) => {
+        setStudents(res.data.students);
+      })
+      .catch((err) => {
+        // Error fetching students
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [headers]);
+
+  const getGroupById = useCallback((id: string) => {
+    setActiveGroupId(id);
+    setIsLoading(true);
+    getStudentsFromGroup(id);
+  }, [getStudentsFromGroup]);
+
+  const [addModalLoading, setAddModalLoading] = useState(false);
+
+  const addStudentToGroup = () => {
+    setAddModalLoading(true);
+    if (userId) {
+      return handleAddStudent();
+    } else {
+      toast.error("in-valid name or this student is already in group");
+      setAddModalLoading(false);
+    }
+  };
+
+  const handleAddStudent = useCallback(() => {
+    axios
+      .get(`${baseUrl}/student/${userId}/${groupId}`, headers)
+      .then((response) => {
+        toast.success(response.data.message);
+        closeModal();
+        getGroupById(activeGroupId!);
+      })
+      .catch((error) => {
+        toast.error(error.response.data.message);
+      })
+      .finally(() => {
+        setAddModalLoading(false);
+      });
+  }, [userId, groupId, headers, closeModal, getGroupById, activeGroupId]);
+
+  const getGroups = useCallback(() => {
     axios
       .get(`${baseUrl}/group`, headers)
       .then((response) => {
@@ -46,62 +98,11 @@ export default function Students() {
       .catch((error) => {
         toast.error(error.response.data.message || "Invalid Data");
       });
-  };
-
-  const [students, setStudents] = useState(new Array());
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const getGroupById = (id: string) => {
-    setActiveGroupId(id);
-    setIsLoading(true);
-    getStudentsFromGroup(id);
-  };
-  
-  const getStudentsFromGroup = (id: string) => {
-    axios
-      .get(`${baseUrl}/group/${id}`, headers)
-      .then((res) => {
-        setStudents(res.data.students);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
-
-  const [addModalLoading, setaddModalLoading] = useState(false);
-
-  const addStudentToGroup = () => {
-    setaddModalLoading(true);
-    if (userId) {
-      return handleAddStudent();
-    } else {
-      toast.error("in-valid name or this student is already in group");
-      setaddModalLoading(false);
-    }
-  };
-
-  const handleAddStudent = () => {
-    axios
-      .get(`${baseUrl}/student/${userId}/${groupId}`, headers)
-      .then((response) => {
-        toast.success(response.data.message);
-        closeModal();
-        getGroupById(activeGroupId);
-      })
-      .catch((error) => {
-        toast.error(error.response.data.message);
-      })
-      .finally(() => {
-        setaddModalLoading(false);
-      });
-  };
+  }, [headers, groupId, getGroupById]);
 
   useEffect(() => {
     getGroups();
-  }, []);
+  }, [getGroups]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -173,10 +174,10 @@ export default function Students() {
                 </div>
               ) : students.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative">
-                  {students.map((student: studentInfo, index) => (
+                  {students.map((student: studentInfo, index: number) => (
                     <div key={index} className="relative">
                       <StudentCard 
-                        activeGroupId={activeGroupId} 
+                        activeGroupId={activeGroupId!} 
                         getGroupById={getGroupById} 
                         student={student} 
                         groups={groups}

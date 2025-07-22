@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Loading from "../../Shared/Loading/Loading";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import { RootState } from "../../types";
 
 interface DeleteQuestionModalProps {
   isOpen: boolean;
@@ -20,7 +21,7 @@ export default function DeleteQuestionModal({
   questionTitle
 }: DeleteQuestionModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { userData } = useSelector((state: any) => state.userData);
+  const { userData } = useSelector((state: RootState) => state.userData);
   const reqHeaders = `Bearer ${userData?.accessToken}`;
 
   // Handle keyboard navigation
@@ -55,8 +56,9 @@ export default function DeleteQuestionModal({
       toast.success(response?.data?.message || "Question deleted successfully");
       onClose();
       getAllQuestions();
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Error deleting question");
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Error deleting question";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

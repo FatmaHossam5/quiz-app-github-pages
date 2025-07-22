@@ -20,7 +20,14 @@ export interface AuthState {
   userData: {
     accessToken: string;
     refreshToken: string;
-    profile: User['profile'];
+    profile: {
+      _id: string;
+      status: string;
+      role: string;
+      last_name: string;
+      first_name: string;
+      email: string;
+    };
   } | null;
   headers: {
     headers: {
@@ -80,7 +87,7 @@ export interface Group {
 
 // Form and Component Types
 export interface FormData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface QuizFormData {
@@ -155,6 +162,8 @@ export interface RootState {
 export interface ModalProps {
   show: boolean;
   title?: string;
+  description?: string;
+  customIcon?: string;
   onClose: () => void;
   onSave?: () => void;
   body?: React.ReactNode;
@@ -172,7 +181,7 @@ export type LoadingState = 'idle' | 'pending' | 'succeeded' | 'failed';
 export interface ApiError {
   message: string;
   status: number;
-  data?: any;
+  data?: unknown;
 }
 
 // Student Quiz Submission

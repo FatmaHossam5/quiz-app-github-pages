@@ -1,13 +1,14 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { baseUrl } from '../../../ApiUtils/ApiUtils';
 import Input from '../../../Shared/Input/Input';
 import Loading from '../../../Shared/Loading/Loading';
+import { RootState } from '../../../types';
 
 interface AddStudentInterface {
-  selectedStudentId: React.Dispatch<React.SetStateAction<any>>;
+  selectedStudentId: React.Dispatch<React.SetStateAction<string>>;
   isLoading: boolean;
 }
 
@@ -24,9 +25,9 @@ export default function AddStudentToGroup({ selectedStudentId, isLoading }: AddS
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const { headers } = useSelector((state: any) => state.userData);
+  const { headers } = useSelector((state: RootState) => state.userData);
 
-  const getStudentsWithoutGroup = () => {
+  const getStudentsWithoutGroup = useCallback(() => {
     axios.get(`${baseUrl}/student/without-group`, headers)
       .then((response) => {
         setStudentsWithoutGroup(response.data);
@@ -35,7 +36,7 @@ export default function AddStudentToGroup({ selectedStudentId, isLoading }: AddS
       .catch((error) => {
         toast.error(error.response?.data?.message || 'Failed to fetch students');
       });
-  };
+  }, [headers]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
@@ -117,7 +118,7 @@ export default function AddStudentToGroup({ selectedStudentId, isLoading }: AddS
 
   useEffect(() => {
     getStudentsWithoutGroup();
-  }, []);
+  }, [getStudentsWithoutGroup]);
 
   return (
     <div className="w-full max-w-lg mx-auto p-4 sm:p-6">

@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import Loading from "../../Shared/Loading/Loading";
 import NoData from "../../Shared/NoData/NoData";
+import { RootState } from "../../types";
 
 interface Participant {
   _id: string;
@@ -48,7 +49,7 @@ interface QuizResult {
 
 export default function QuizResultDetails() {
   const { quizTitle } = useParams<{ quizTitle: string }>();
-  const { headers } = useSelector((state: any) => state.userData);
+  const { headers } = useSelector((state: RootState) => state.userData);
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -6,11 +6,14 @@ import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { baseUrl } from "../../../ApiUtils/ApiUtils";
 import { RootState } from "../../../Redux/Store";
-import ErrorMessage from "../../../Shared/ErrorMessage/ErrorMessage";
 import Loading from "../../../Shared/Loading/Loading";
 import SharedModal from "../../../Shared/Modal/Modal";
 import CompletedQuizzes from "../../Quizzes/CompletedQuizzes/CompletedQuizzes";
 import IncomingQuizzes from "../../Quizzes/IncomingQuizzes/IncomingQuizzes";
+
+interface QuizFormData {
+  code: string;
+}
 
 export default function Quiz() {
   const [modalState, setModalState] = useState("close");
@@ -19,7 +22,7 @@ export default function Quiz() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm<QuizFormData>();
   const navigate = useNavigate();
 
   const { incomingQuizzes, loading, error } = useSelector(
@@ -41,10 +44,7 @@ export default function Quiz() {
     setModalState("close");
   };
   
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const joinQuiz = (data: any) => {
-    setIsLoading(true);
+  const joinQuiz = (data: QuizFormData) => {
     axios
       .post(`${baseUrl}/quiz/join`, data, headers)
       .then((response) => {
@@ -54,11 +54,7 @@ export default function Quiz() {
         }, 2000);
       })
       .catch((error) => {
-        console.log(error);
         toast.error(error?.response?.data?.message);
-      })
-      .finally(() => {
-        setIsLoading(false);
       });
   };
 

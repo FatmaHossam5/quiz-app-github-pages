@@ -3,6 +3,8 @@ import React, { ReactNode, useEffect, useRef } from 'react';
 interface SharedModalProps {
   show?: boolean;
   title?: string;
+  description?: string;
+  customIcon?: string;
   body: ReactNode;
   onClose: () => void;
   onSave?: () => void;
@@ -15,6 +17,8 @@ interface SharedModalProps {
 const SharedModal: React.FC<SharedModalProps> = ({
   show,
   title,
+  description,
+  customIcon,
   body,
   onClose,
   onSave,
@@ -65,8 +69,11 @@ const SharedModal: React.FC<SharedModalProps> = ({
     }
   };
 
-  // Get header icon based on type
+  // Get header icon based on type or custom icon
   const getHeaderIcon = () => {
+    if (customIcon) {
+      return customIcon;
+    }
     switch (modalType) {
       case 'delete':
         return 'fa-solid fa-exclamation-triangle text-red-600';
@@ -96,14 +103,21 @@ const SharedModal: React.FC<SharedModalProps> = ({
       >
         {/* Header */}
         <div
-          className={`header flex justify-between items-center border-b border-gray-200 dark:border-gray-700 ${
-            omitHeader ? 'hidden' : 'px-6 py-5'
+          className={`header flex justify-between items-start border-b border-gray-200 dark:border-gray-700 ${
+            omitHeader ? 'hidden' : 'px-6 py-4'
           }`}
         >
-          <div className="flex items-center">
-            <i className={`${getHeaderIcon()} mr-3 text-xl`}></i>
-            <div className='headerName text-lg sm:text-xl font-semibold text-gray-900 dark:text-white' id="modal-title">
-              {title}
+          <div className="flex items-start">
+            <i className={`${getHeaderIcon()} mr-3 text-xl mt-0.5`}></i>
+            <div className='headerName'>
+              <div className='text-lg sm:text-xl font-semibold text-gray-900 dark:text-white' id="modal-title">
+                {title}
+              </div>
+              {description && (
+                <div className='text-sm text-gray-600 dark:text-gray-400 mt-1'>
+                  {description}
+                </div>
+              )}
             </div>
           </div>
           <div className='Icons-close-save flex items-center gap-2'>

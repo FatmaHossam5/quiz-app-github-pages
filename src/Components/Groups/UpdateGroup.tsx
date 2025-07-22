@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { baseUrl } from "../../ApiUtils/ApiUtils";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -8,6 +8,7 @@ import Loading from "../../Shared/Loading/Loading";
 import ErrorMessage from "../../Shared/ErrorMessage/ErrorMessage";
 import Select from "react-select";
 import SharedModal from "../../Shared/Modal/Modal";
+import { RootState } from "../../types";
 
 // Interfaces
 interface Student {
@@ -44,8 +45,19 @@ interface FormData {
   students: Option[];
 }
 
+// React Select style types
+interface SelectStyles {
+  control: (provided: React.CSSProperties) => React.CSSProperties;
+  menu: (provided: React.CSSProperties) => React.CSSProperties;
+  menuPortal: (provided: React.CSSProperties) => React.CSSProperties;
+  multiValue: (provided: React.CSSProperties, state: { data: Option }) => React.CSSProperties;
+  multiValueLabel: (provided: React.CSSProperties, state: { data: Option }) => React.CSSProperties;
+  multiValueRemove: (provided: React.CSSProperties, state: { data: Option }) => React.CSSProperties;
+  option: (provided: React.CSSProperties, state: { isSelected: boolean; isFocused: boolean; data: Option }) => React.CSSProperties;
+}
+
 export default function UpdateGroup({ getGroups, isOpen, onClose, group }: UpdateGroupProps) {
-  const { headers } = useSelector((state: any) => state.userData);
+  const { headers } = useSelector((state: RootState) => state.userData);
   const [studentsList, setStudentsList] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,27 +72,27 @@ export default function UpdateGroup({ getGroups, isOpen, onClose, group }: Updat
     formState: { errors },
   } = useForm<FormData>();
 
-  const getStudents = async () => {
+  const getStudents = useCallback(async () => {
     setIsLoading(true);
     try {
       // Get students without group for dropdown options only
       const response = await axios.get(`${baseUrl}/student/without-group`, headers);
       const studentsWithoutGroup: Student[] = response.data;
       setStudentsList(studentsWithoutGroup);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error("Failed to load students.");
       setStudentsList([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [headers]);
   
 
   useEffect(() => {
     if (isOpen) {
       getStudents();
     }
-  }, [isOpen, group]);
+  }, [isOpen, getStudents]);
   
 
   const studentOptions: Option[] = studentsList.map((student) => ({
@@ -124,22 +136,19 @@ useEffect(() => {
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
-
-    const submitData = {
-      name: data.name,
-      students: data.students?.map(student => student.value) || [],
-    };
-
     try {
-      const response = await axios.put(`${baseUrl}/group/${group._id}`, submitData, headers);
-
-      toast.success(response?.data?.message || "Group updated successfully!");
-
-      reset();
-      onClose();
+      const studentIds = data.students.map(student => student.value);
+      await axios.put(`${baseUrl}/group/${group._id}`, {
+        name: data.name,
+        students: studentIds
+      }, headers);
+      
+      toast.success("Group updated successfully!");
+      handleClose();
       getGroups();
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Failed to update group.");
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to update group.";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -150,8 +159,8 @@ useEffect(() => {
     onClose();
   };
 
-  const selectStyles = {
-    control: (provided: any) => ({
+  const selectStyles: SelectStyles = {
+    control: (provided: React.CSSProperties) => ({
       ...provided,
       border: '1px solid #d1d5db',
       borderRadius: '0.375rem 0.75rem 0.75rem 0.375rem',
@@ -160,21 +169,21 @@ useEffect(() => {
       '&:hover': { borderColor: '#6366f1' },
       '&:focus': { borderColor: '#6366f1', boxShadow: '0 0 0 1px #6366f1' },
     }),
-    menu: (provided: any) => ({ ...provided, zIndex: 9999 }),
-    menuPortal: (provided: any) => ({ ...provided, zIndex: 9999 }),
-    multiValue: (provided: any, state: any) => ({
+    menu: (provided: React.CSSProperties) => ({ ...provided, zIndex: 9999 }),
+    menuPortal: (provided: React.CSSProperties) => ({ ...provided, zIndex: 9999 }),
+    multiValue: (provided: React.CSSProperties, state: { data: Option }) => ({
       ...provided,
       backgroundColor: state.data.isCurrentMember ? '#dbeafe' : '#f3f4f6',
       borderRadius: '0.375rem',
       border: state.data.isCurrentMember ? '1px solid #3b82f6' : 'none',
     }),
-    multiValueLabel: (provided: any, state: any) => ({
+    multiValueLabel: (provided: React.CSSProperties, state: { data: Option }) => ({
       ...provided,
       color: state.data.isCurrentMember ? '#1e40af' : '#374151',
       fontSize: '0.875rem',
       fontWeight: state.data.isCurrentMember ? '600' : '400',
     }),
-    multiValueRemove: (provided: any, state: any) => ({
+    multiValueRemove: (provided: React.CSSProperties, state: { data: Option }) => ({
       ...provided,
       color: state.data.isCurrentMember ? '#3b82f6' : '#6b7280',
       '&:hover': { 
@@ -182,7 +191,7 @@ useEffect(() => {
         color: 'white' 
       },
     }),
-    option: (provided: any, state: any) => ({
+    option: (provided: React.CSSProperties, state: { isSelected: boolean; isFocused: boolean; data: Option }) => ({
       ...provided,
       backgroundColor: state.isSelected 
         ? (state.data.isCurrentMember ? '#dbeafe' : '#6366f1')

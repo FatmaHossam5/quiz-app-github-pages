@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { toast } from 'react-toastify';
 import { Cookies } from 'typescript-cookie';
-import { ApiResponse, ApiError, Quiz } from '../types';
+import { ApiResponse, ApiError, Quiz, Question, Group, QuizResult } from '../types';
 import { normalizeQuizArray } from '../utils/quizDataNormalizer';
 
 // Base API configuration
@@ -19,36 +19,22 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    console.log('🔍 [Axios Interceptor] Request interceptor called');
-    console.log('📊 [Axios Interceptor] Request URL:', config.url);
-    console.log('📊 [Axios Interceptor] Request method:', config.method);
-    console.log('📊 [Axios Interceptor] Request headers:', config.headers);
-    
     const userData = Cookies.get('userData');
-    console.log('📊 [Axios Interceptor] User data from cookies:', userData ? 'Present' : 'Not present');
     
     if (userData) {
       try {
         const parsedData = JSON.parse(userData as string);
-        console.log('📊 [Axios Interceptor] Parsed user data:', parsedData);
         if (parsedData.accessToken) {
           config.headers.Authorization = `Bearer ${parsedData.accessToken}`;
-          console.log('✅ [Axios Interceptor] Authorization header added');
-        } else {
-          console.log('⚠️ [Axios Interceptor] No access token found in user data');
         }
       } catch (error) {
-        console.error('❌ [Axios Interceptor] Error parsing user data from cookies:', error);
+        // Error parsing user data from cookies
       }
-    } else {
-      console.log('⚠️ [Axios Interceptor] No user data found in cookies');
     }
     
-    console.log('📊 [Axios Interceptor] Final request config:', config);
     return config;
   },
   (error) => {
-    console.error('❌ [Axios Interceptor] Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
@@ -56,20 +42,9 @@ apiClient.interceptors.request.use(
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log('✅ [Axios Interceptor] Response interceptor - Success');
-    console.log('📊 [Axios Interceptor] Response URL:', response.config.url);
-    console.log('📊 [Axios Interceptor] Response status:', response.status);
-    console.log('📊 [Axios Interceptor] Response headers:', response.headers);
-    console.log('📊 [Axios Interceptor] Response data:', response.data);
     return response;
   },
   (error: AxiosError) => {
-    console.error('❌ [Axios Interceptor] Response interceptor - Error');
-    console.error('📊 [Axios Interceptor] Error URL:', error.config?.url);
-    console.error('📊 [Axios Interceptor] Error status:', error.response?.status);
-    console.error('📊 [Axios Interceptor] Error data:', error.response?.data);
-    console.error('📊 [Axios Interceptor] Error message:', error.message);
-    
     const apiError: ApiError = {
       message: 'An unexpected error occurred',
       status: error.response?.status || 500,
@@ -77,33 +52,28 @@ apiClient.interceptors.response.use(
     };
 
     if (error.response?.data && typeof error.response.data === 'object') {
-      const errorData = error.response.data as any;
-      apiError.message = errorData.message || apiError.message;
+      const errorData = error.response.data as Record<string, unknown>;
+      apiError.message = (errorData.message as string) || apiError.message;
     }
 
     // Handle specific error cases
     switch (error.response?.status) {
       case 401:
-        console.log('🔍 [Axios Interceptor] 401 Unauthorized - redirecting to login');
         // Handle unauthorized - redirect to login
         Cookies.remove('userData');
         window.location.href = '/login';
         break;
       case 403:
-        console.log('🔍 [Axios Interceptor] 403 Forbidden');
         apiError.message = 'You do not have permission to perform this action';
         break;
       case 404:
-        console.log('🔍 [Axios Interceptor] 404 Not Found');
         apiError.message = 'Resource not found';
         break;
       case 500:
-        console.log('🔍 [Axios Interceptor] 500 Internal Server Error');
         apiError.message = 'Internal server error. Please try again later.';
         break;
     }
 
-    console.error('📊 [Axios Interceptor] Final API error:', apiError);
     return Promise.reject(apiError);
   }
 );
@@ -112,54 +82,28 @@ apiClient.interceptors.response.use(
 class ApiService {
   // GET request
   async get<T>(endpoint: string, config?: AxiosRequestConfig): Promise<T> {
-    console.log('🔍 [ApiService] GET request to:', endpoint);
-    console.log('🔍 [ApiService] Full URL:', `${BASE_URL}${endpoint}`);
-    console.log('🔍 [ApiService] Config:', config);
-    
     try {
-      console.log('🔍 [ApiService] Making HTTP request...');
       const response = await apiClient.get<ApiResponse<T>>(endpoint, config);
-      console.log('✅ [ApiService] HTTP request successful');
-      console.log('📊 [ApiService] Response status:', response.status);
-      console.log('📊 [ApiService] Response headers:', response.headers);
-      console.log('📊 [ApiService] Full response data:', response.data);
-      console.log('📊 [ApiService] Response data type:', typeof response.data);
-      console.log('📊 [ApiService] Response data keys:', Object.keys(response.data));
-      console.log('📊 [ApiService] Extracted data:', response.data.data);
-      console.log('📊 [ApiService] Data type:', typeof response.data.data);
-      console.log('📊 [ApiService] Is array:', Array.isArray(response.data.data));
-      console.log('📊 [ApiService] Data constructor:', response.data.data?.constructor?.name);
-      console.log('📊 [ApiService] Data stringified:', JSON.stringify(response.data.data, null, 2));
       
       // Handle different possible response structures
-      let finalData: any = response.data.data;
+      let finalData: unknown = response.data.data;
       
       // If data.data is not an array, check if response.data itself is an array
       if (!Array.isArray(finalData)) {
-        console.log('⚠️ [ApiService] response.data.data is not an array, checking response.data');
         if (Array.isArray(response.data)) {
-          console.log('✅ [ApiService] response.data is an array, using it directly');
           finalData = response.data;
-        } else {
-          console.log('❌ [ApiService] Neither response.data.data nor response.data is an array');
-          console.log('📊 [ApiService] response.data structure:', response.data);
         }
       }
       
-      console.log('📊 [ApiService] Final data to return:', finalData);
-      console.log('📊 [ApiService] Final data type:', typeof finalData);
-      console.log('📊 [ApiService] Final data is array:', Array.isArray(finalData));
-      
       return finalData as T;
     } catch (error) {
-      console.error('❌ [ApiService] HTTP request failed:', error);
       this.handleError(error as ApiError);
       throw error;
     }
   }
 
   // POST request
-  async post<T>(endpoint: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async post<T>(endpoint: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     try {
       const response = await apiClient.post<ApiResponse<T>>(endpoint, data, config);
       return response.data.data;
@@ -170,7 +114,7 @@ class ApiService {
   }
 
   // PUT request
-  async put<T>(endpoint: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async put<T>(endpoint: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     try {
       const response = await apiClient.put<ApiResponse<T>>(endpoint, data, config);
       return response.data.data;
@@ -197,9 +141,6 @@ class ApiService {
     if (error.status !== 401) {
       toast.error(error.message);
     }
-    
-    // Log error for debugging
-    console.error('API Error:', error);
   }
 }
 
@@ -229,61 +170,41 @@ export class AuthService {
   }
 }
 
-export class QuizService {
+export class QuizService extends ApiService {
   // Role-based quiz fetching methods - using the correct endpoint
   async getIncomingQuizzes(): Promise<Quiz[]> {
-    console.log('🔍 [QuizService] getIncomingQuizzes() called');
     const endpoint = '/quiz/incomming'; // This is the only endpoint you have
-    console.log('🔍 [QuizService] Using endpoint:', endpoint);
     
     try {
-      console.log('🔍 [QuizService] Making API request to:', `${BASE_URL}${endpoint}`);
-      const data = await apiService.get<Quiz[]>(endpoint);
-      console.log('✅ [QuizService] getIncomingQuizzes() successful');
-      console.log('📊 [QuizService] Received data:', data);
-      console.log('📊 [QuizService] Data type:', typeof data);
-      console.log('📊 [QuizService] Data length:', Array.isArray(data) ? data.length : 'Not an array');
-      console.log('📊 [QuizService] Data structure:', JSON.stringify(data, null, 2));
+      const data = await this.get<Quiz[]>(endpoint);
       
       // Ensure we always return an array and normalize the data
       if (!Array.isArray(data)) {
-        console.log('⚠️ [QuizService] Data is not an array, converting to empty array');
         return [];
       }
       
       // Normalize the quiz data to handle field name mismatches
-      const normalizedData = normalizeQuizArray(data);
-      console.log('✅ [QuizService] Data normalized successfully');
-      console.log('✅ [QuizService] Returning normalized array with', normalizedData.length, 'items');
+      const normalizedData = normalizeQuizArray(data as unknown as Record<string, unknown>[]);
       return normalizedData;
-    } catch (error: any) {
-      console.error('❌ [QuizService] getIncomingQuizzes() failed:', error);
-      console.error('❌ [QuizService] Error details:', {
-        message: error.message,
-        status: error.status,
-        data: error.data
-      });
+    } catch (error: unknown) {
       throw error;
     }
   }
 
-  async getCompletedQuizzes(role: 'Student' | 'Instructor'): Promise<Quiz[]> {
+  async getCompletedQuizzes(): Promise<Quiz[]> {
     const endpoint = '/quiz/completed';
     try {
-      const data = await apiService.get<Quiz[]>(endpoint);
+      const data = await this.get<Quiz[]>(endpoint);
       
       // Ensure we always return an array and normalize the data
       if (!Array.isArray(data)) {
-        console.log('⚠️ [QuizService] Completed quizzes data is not an array, converting to empty array');
         return [];
       }
       
       // Normalize the quiz data to handle field name mismatches
-      const normalizedData = normalizeQuizArray(data);
-      console.log('✅ [QuizService] Completed quizzes data normalized successfully');
+      const normalizedData = normalizeQuizArray(data as unknown as Record<string, unknown>[]);
       return normalizedData;
-    } catch (error: any) {
-      console.error('❌ [QuizService] getCompletedQuizzes() failed:', error);
+    } catch (error: unknown) {
       throw error;
     }
   }
@@ -297,72 +218,72 @@ export class QuizService {
   //   return apiService.get('/quiz');
   // }
 
-  async createQuiz(quizData: any) {
-    return apiService.post('/quiz', quizData);
+  async createQuiz(quizData: Record<string, unknown>) {
+    return this.post<Quiz>('/quiz', quizData);
   }
 
-  async updateQuiz(id: string, quizData: any) {
-    return apiService.put(`/quiz/${id}`, quizData);
+  async updateQuiz(id: string, quizData: Record<string, unknown>) {
+    return this.put<Quiz>(`/quiz/${id}`, quizData);
   }
 
   async deleteQuiz(id: string) {
-    return apiService.delete(`/quiz/${id}`);
+    return this.delete<{ message: string }>(`/quiz/${id}`);
   }
 
   async joinQuiz(code: { code: string }) {
-    return apiService.post('/quiz/join', code);
+    return this.post<{ message: string }>('/quiz/join', code);
   }
 
   async getQuizQuestions(quizId: string) {
-    return apiService.get(`/quiz/without-answers/${quizId}`);
+    return this.get<Question[]>(`/quiz/without-answers/${quizId}`);
   }
 
-  async submitQuiz(quizId: string, answers: { answers: any[] }) {
-    return apiService.post(`/quiz/submit/${quizId}`, answers);
+  async submitQuiz(quizId: string, answers: { answers: unknown[] }) {
+    return this.post<{ message: string }>(`/quiz/submit/${quizId}`, answers);
   }
 
   async getQuizResults() {
-    return apiService.get('/quiz/result');
+    return this.get<QuizResult[]>('/quiz/result');
   }
 }
 
-export class QuestionService {
+export class QuestionService extends ApiService {
   async getQuestions() {
-    return apiService.get('/question');
+    return this.get<Question[]>('/question');
   }
 
-  async createQuestion(questionData: any) {
-    return apiService.post('/question', questionData);
+  async createQuestion(questionData: Record<string, unknown>) {
+    return this.post<Question>('/question', questionData);
   }
 
-  async updateQuestion(id: string, questionData: any) {
-    return apiService.put(`/question/${id}`, questionData);
+  async updateQuestion(id: string, questionData: Record<string, unknown>) {
+    return this.put<Question>(`/question/${id}`, questionData);
   }
 
   async deleteQuestion(id: string) {
-    return apiService.delete(`/question/${id}`);
+    return this.delete<{ message: string }>(`/question/${id}`);
   }
 }
 
-export class GroupService {
+export class GroupService extends ApiService {
   async getGroups() {
-    return apiService.get('/group');
+    return this.get<Group[]>('/group');
   }
 
-  async createGroup(groupData: any) {
-    return apiService.post('/group', groupData);
+  async createGroup(groupData: Record<string, unknown>) {
+    return this.post<Group>('/group', groupData);
   }
 
-  async updateGroup(id: string, groupData: any) {
-    return apiService.put(`/group/${id}`, groupData);
+  async updateGroup(id: string, groupData: Record<string, unknown>) {
+    return this.put<Group>(`/group/${id}`, groupData);
   }
 
   async deleteGroup(id: string) {
-    return apiService.delete(`/group/${id}`);
+    return this.delete<{ message: string }>(`/group/${id}`);
   }
 
   async getGroupById(id: string) {
-    return apiService.get(`/group/${id}`);
+    return this.get<Group>(`/group/${id}`);
   }
 }
 

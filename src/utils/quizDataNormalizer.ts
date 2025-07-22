@@ -4,7 +4,7 @@ import { Quiz } from '../types';
  * Normalizes quiz data to handle field name mismatches between frontend and backend
  * The backend uses 'schadule' (with typo) while frontend expects 'schedule'
  */
-export const normalizeQuizData = (quiz: any): Quiz => {
+export const normalizeQuizData = (quiz: Record<string, unknown>): Quiz => {
   // Handle the schedule/schadule field name mismatch
   const normalizedQuiz = { ...quiz };
   
@@ -18,12 +18,12 @@ export const normalizeQuizData = (quiz: any): Quiz => {
     normalizedQuiz.schedule = quiz.schedule;
   }
   
-  return normalizedQuiz as Quiz;
+  return normalizedQuiz as unknown as Quiz;
 };
 
 /**
  * Normalizes an array of quiz data
  */
-export const normalizeQuizArray = (quizzes: any[]): Quiz[] => {
+export const normalizeQuizArray = (quizzes: Record<string, unknown>[]): Quiz[] => {
   return quizzes.map(normalizeQuizData);
 }; 

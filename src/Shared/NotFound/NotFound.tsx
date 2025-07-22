@@ -1,8 +1,9 @@
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { RootState } from "../../types";
 
 export default function NotFound() {
-  const {role}=useSelector((state:any)=>state.userData.userData.profile)
+  const {role}=useSelector((state: RootState)=>state.userData.userData?.profile)
   return (
     <main>
     <div className="text-center pt-28">

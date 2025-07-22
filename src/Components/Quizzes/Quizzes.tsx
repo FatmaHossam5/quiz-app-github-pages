@@ -4,7 +4,6 @@ import IncomingQuizzes from "./IncomingQuizzes/IncomingQuizzes";
 import CodeModal from "./CodeModal/CodeModal";
 import CompletedQuizzes from "./CompletedQuizzes/CompletedQuizzes";
 import QuizModal from "./QuizModal/QuizModal";
-import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Loading from "../../Shared/Loading/Loading";
 import "./Quizzes.css";
@@ -14,16 +13,7 @@ export default function Quizzes() {
   const { incomingQuizzes, loading, error } = useSelector((state: RootState) => state.incomingQuizzes);
   const { completedQuizzes } = useSelector((state: RootState) => state.CompletedQuizzes);
   
-  console.log('🔍 [Quizzes Component] Component rendered');
-  console.log('📊 [Quizzes Component] Redux state:', {
-    incomingQuizzes,
-    loading,
-    error
-  });
-  console.log('📊 [Quizzes Component] incomingQuizzes type:', typeof incomingQuizzes);
-  console.log('📊 [Quizzes Component] Is array:', Array.isArray(incomingQuizzes));
-  console.log('📊 [Quizzes Component] Length:', Array.isArray(incomingQuizzes) ? incomingQuizzes.length : 'Not an array');
-  console.log('📊 [Quizzes Component] Full incomingQuizzes data:', incomingQuizzes);
+
 
   const [modalState, setModalState] = useState("close");
   const [code, setCode] = useState<string>("");
@@ -93,10 +83,9 @@ export default function Quizzes() {
       {/* Modals */}
       <SharedModal
         show={modalState === "add"}
-        title="Set up a new quiz"
-        onSave={() => {
-         ()=>{}
-        }}
+        title="Create New Quiz"
+        description="Fill in the details below to create a new quiz"
+        customIcon="fa-solid fa-file-circle-plus text-blue-600"
         onClose={handleClose}
         body={
           modalState =="add"?<QuizModal setCode={setCode} setModalState={setModalState} handleClose={handleClose}/>:""
@@ -106,7 +95,7 @@ export default function Quizzes() {
         show={modalState === "quiz-code"}
         title=""
         onSave={() => {
-          console.log("hello");
+          // Save action
         }}
         omitHeader={true}
         onClose={handleClose}

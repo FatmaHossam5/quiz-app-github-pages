@@ -18,23 +18,15 @@ export default function ProtectedRoute({userData,children}:ProtectedProp) {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    console.log('🔍 [ProtectedRoute] useEffect triggered');
-    console.log('📊 [ProtectedRoute] userData:', userData);
-    console.log('📊 [ProtectedRoute] checkRole:', checkRole);
-    console.log('📊 [ProtectedRoute] userData?.accessToken:', userData?.accessToken);
-    
     if (userData?.accessToken && !checkRole) {
-      console.log('✅ [ProtectedRoute] Conditions met - dispatching fetchAllQuizzes for Instructor');
       // Use the new role-based quiz fetching for instructors
       dispatch(fetchAllQuizzes('Instructor'));
       
-      const fetchGroups=(response:any)=>{dispatch(setGroup(response))}
-      const fetchStudents=(response:any)=>{dispatch(setStudents(response))}
+      const fetchGroups=(response: unknown)=>{dispatch(setGroup(response))}
+      const fetchStudents=(response: unknown)=>{dispatch(setStudents(response))}
       
       fetchDataForSlice('group',fetchGroups);
       fetchDataForSlice('student/top-five',fetchStudents);
-    } else {
-      console.log('⚠️ [ProtectedRoute] Conditions not met - not dispatching fetchAllQuizzes');
     }
   }, [dispatch, userData, checkRole]);
 

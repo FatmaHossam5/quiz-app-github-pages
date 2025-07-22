@@ -31,8 +31,9 @@ export const useQuizData = (): UseQuizDataReturn => {
       setError(null);
       const data = await quizService.getIncomingQuizzes(userRole);
       setIncomingQuizzes(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch incoming quizzes');
+    } catch (err: unknown) {
+      const errorMessage = (err as { message?: string })?.message || 'Failed to fetch incoming quizzes';
+      setError(errorMessage);
       console.error('Error fetching incoming quizzes:', err);
     } finally {
       setIsLoading(false);
@@ -47,8 +48,9 @@ export const useQuizData = (): UseQuizDataReturn => {
       setError(null);
       const data = await quizService.getCompletedQuizzes(userRole);
       setCompletedQuizzes(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch completed quizzes');
+    } catch (err: unknown) {
+      const errorMessage = (err as { message?: string })?.message || 'Failed to fetch completed quizzes';
+      setError(errorMessage);
       console.error('Error fetching completed quizzes:', err);
     } finally {
       setIsLoading(false);

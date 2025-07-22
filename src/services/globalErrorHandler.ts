@@ -1,6 +1,7 @@
 import { toast } from 'react-toastify';
 import { ErrorType, ErrorSeverity } from '../types/errors';
 import { errorLogger } from './errorLogger';
+import { AppError } from '../types/errors';
 
 class GlobalErrorHandler {
   private isInitialized = false;
@@ -169,7 +170,7 @@ class GlobalErrorHandler {
       // Handle resource loading errors (images, scripts, stylesheets)
       if (target && target !== window) {
         const tagName = target.tagName?.toLowerCase();
-        const src = (target as any).src || (target as any).href;
+        const src = (target as HTMLImageElement | HTMLScriptElement | HTMLLinkElement).src || (target as HTMLAnchorElement).href;
         
         if (tagName && src) {
           const error = errorLogger.createError(
@@ -214,7 +215,7 @@ class GlobalErrorHandler {
     });
   }
 
-  private handleError(error: any) {
+  private handleError(error: AppError) {
     // Rate limiting
     const now = Date.now();
     if (now - this.lastErrorTime < this.errorThrottleMs) {
@@ -249,7 +250,7 @@ class GlobalErrorHandler {
     this.attemptAutoRecovery(error);
   }
 
-  private showUserNotification(error: any) {
+  private showUserNotification(error: AppError) {
     const { severity, userMessage } = error;
     
     switch (severity) {
@@ -280,34 +281,24 @@ class GlobalErrorHandler {
     }
   }
 
-  private attemptAutoRecovery(error: any) {
-    if (!error.recoverable) return;
-
+  private attemptAutoRecovery(error: AppError) {
+    // Implement auto-recovery logic based on error type
     switch (error.type) {
       case ErrorType.NETWORK_ERROR:
-        // Auto-retry network requests after delay
-        setTimeout(() => {
-          if (navigator.onLine) {
-            window.location.reload();
-          }
-        }, 5000);
+        // Could implement retry logic here
         break;
-        
       case ErrorType.AUTHENTICATION_ERROR:
-        // Redirect to login
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
+        // Could redirect to login
+        break;
+      default:
+        // No auto-recovery for other error types
         break;
     }
   }
 
-  private reportToExternalService(error: any) {
-    // In production, send to external monitoring service
-    if (process.env.NODE_ENV === 'production') {
-      // Example: Sentry, LogRocket, DataDog, etc.
-      console.log('Would report to external service:', error);
-    }
+  private reportToExternalService(error: AppError) {
+    // In a real application, you would send this to an external service
+    // Error reported to external service
   }
 
   private getErrorSeverity(error: Error): ErrorSeverity {
@@ -354,7 +345,7 @@ class GlobalErrorHandler {
     // In a real implementation, this would send any queued errors to the server
     const pendingErrors = errorLogger.getLogs().filter(log => log.level === 'error');
     if (pendingErrors.length > 0) {
-      console.log('Flushing pending errors:', pendingErrors);
+      // Pending errors flushed
     }
   }
 

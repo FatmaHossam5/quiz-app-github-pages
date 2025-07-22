@@ -5,6 +5,7 @@ import CodeModal from "../../Components/Quizzes/CodeModal/CodeModal";
 import QuizModal from "../../Components/Quizzes/QuizModal/QuizModal";
 import { logOut } from "../../Redux/Slices/AuthSlice/AuthSlice";
 import SharedModal from "../Modal/Modal";
+import { RootState } from "../../types";
 
 export default function NavBar() {
   const dispatch = useDispatch();
@@ -15,9 +16,9 @@ export default function NavBar() {
   const [isLoading, setIsLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const { userData } = useSelector((state: any) => state.userData);
-  const fullName = `${userData.profile.first_name} ${userData.profile.last_name}`;
-  const role = userData.profile.role;
+  const { userData } = useSelector((state: RootState) => state.userData);
+  const fullName = userData ? `${userData.profile.first_name} ${userData.profile.last_name}` : 'User';
+  const role = userData?.profile.role || 'Student';
   const isStudent = role === "Student";
 
   // Close dropdown when clicking outside
@@ -66,7 +67,7 @@ export default function NavBar() {
     try {
       dispatch(logOut());
     } catch (error) {
-      console.error("Logout failed:", error);
+      // Logout failed
     } finally {
       setIsLoading(false);
     }
@@ -238,10 +239,10 @@ export default function NavBar() {
       {/* Modals */}
       <SharedModal
         show={modalState === "add"}
-        title="Set up a new quiz"
-        onSave={() => {
-          // Empty function - handled by QuizModal
-        }}
+        title="Create New Quiz"
+        description="Fill in the details below to create a new quiz"
+        customIcon="fa-solid fa-file-circle-plus text-blue-600"
+       
         onClose={handleClose}
         body={
           modalState === "add" ? (
@@ -258,7 +259,7 @@ export default function NavBar() {
         show={modalState === "quiz-code"}
         title=""
         onSave={() => {
-          console.log("Code modal save");
+          // Code modal save
         }}
         omitHeader={true}
         onClose={handleClose}

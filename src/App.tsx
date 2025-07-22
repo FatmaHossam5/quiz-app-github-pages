@@ -1,8 +1,10 @@
 import React, { Suspense } from "react";
 import { useSelector } from "react-redux";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { RouterProvider, createBrowserRouter, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "./App.css";
+import { RootState } from "./types";
+import { UserData } from "./Redux/Slices/AuthSlice/Interfaces";
 
 // Error handling system
 import { ErrorProvider } from "./context/ErrorContext";
@@ -47,7 +49,7 @@ const SuspenseFallback = () => (
 
 // Higher-order component for wrapping lazy components with error boundaries
 const withRouteErrorBoundary = (Component: React.ComponentType, routeName: string) => {
-  return (props: any) => (
+  return (props: React.ComponentProps<typeof Component>) => (
     <RouteErrorBoundary routeName={routeName}>
       <Suspense fallback={<SuspenseFallback />}>
         <Component {...props} />
@@ -57,17 +59,22 @@ const withRouteErrorBoundary = (Component: React.ComponentType, routeName: strin
 };
 
 function App() {
-  const { userData } = useSelector((state: any) => state.userData);
-
-  const routes = createBrowserRouter([
+  const { userData } = useSelector((state: RootState) => state.userData);
+  const basename = (import.meta.env.BASE_URL ?? "/quiz-app-github-pages/")
+  .replace(/\/+$/, "");
+    const routes = createBrowserRouter([
     {
       path: "dashboard",
       element: (
-        <ProtectedRoute userData={userData}>
-          <RouteErrorBoundary routeName="Dashboard Layout">
-            <MasterLayout />
-          </RouteErrorBoundary>
-        </ProtectedRoute>
+        userData ? (
+          <ProtectedRoute userData={userData as UserData}>
+            <RouteErrorBoundary routeName="Dashboard Layout">
+              <MasterLayout />
+            </RouteErrorBoundary>
+          </ProtectedRoute>
+        ) : (
+          <Navigate to="/login" />
+        )
       ),
       errorElement: <NotFound />,
       children: [
@@ -144,11 +151,15 @@ function App() {
     {
       path: "student",
       element: (
-        <ProtectedRouteForStudent userData={userData}>
-          <RouteErrorBoundary routeName="Student Layout">
-            <StudentLayout />
-          </RouteErrorBoundary>
-        </ProtectedRouteForStudent>
+        userData ? (
+          <ProtectedRouteForStudent userData={userData as UserData}>
+            <RouteErrorBoundary routeName="Student Layout">
+              <StudentLayout />
+            </RouteErrorBoundary>
+          </ProtectedRouteForStudent>
+        ) : (
+          <Navigate to="/login" />
+        )
       ),
       errorElement: <NotFound />,
       children: [
@@ -171,7 +182,7 @@ function App() {
         },
       ],
     },
-  ]);
+  ],{ basename });
 
   return (
     <ErrorProvider

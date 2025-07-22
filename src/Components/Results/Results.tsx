@@ -1,29 +1,45 @@
-import { Link } from "react-router-dom";
 import { getData } from "../../ApiUtils/ApiUtils";
 import { useSelector } from "react-redux";
-import { useEffect, useState } from "react";
-import NoData from "../../Shared/NoData/NoData";
+import { useEffect, useState, useCallback, Dispatch } from "react";
+import { Link } from "react-router-dom";
 import Loading from "../../Shared/Loading/Loading";
+import { RootState } from "../../types";
+
+interface QuizResult {
+  quiz: {
+    _id: string;
+    title: string;
+    type: string;
+    status: string;
+  };
+  participants: Array<{
+    _id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    score: number;
+  }>;
+}
 
 export default function Results() {
-  const { headers } = useSelector((state: any) => state.userData);
-  const [getResults, setGetResults] = useState<object[]>();
+  const { headers } = useSelector((state: RootState) => state.userData);
+  const [getResults, setGetResults] = useState<QuizResult[]>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const getAllResults = () => {
+  const getAllResults = useCallback(() => {
     try {
       setIsLoading(true);
-      getData({ path: 'quiz/result', headers, setState: setGetResults });
+      getData({ path: 'quiz/result', headers, setState: setGetResults as Dispatch<unknown> });
     } catch (error) {
       console.error('Error fetching results:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [headers]);
 
   useEffect(() => {
     getAllResults();
-  }, []);
+  }, [getAllResults]);
 
   // Helper function to get status color
   const getStatusColor = (status: string) => {
@@ -65,7 +81,7 @@ export default function Results() {
                   <div className="flex items-center">
                     <i className="fa-solid fa-users mr-2 text-green-500"></i>
                     <span>Total Participants: <span className="font-semibold text-gray-900">
-                      {getResults.reduce((acc: number, result: any) => acc + (result.participants?.length || 0), 0)}
+                      {getResults.reduce((acc: number, result: QuizResult) => acc + (result.participants?.length || 0), 0)}
                     </span></span>
                   </div>
                 </div>
@@ -124,7 +140,7 @@ export default function Results() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {getResults.map((result: any, index: number) => (
+                    {getResults.map((result: QuizResult, index: number) => (
                       <tr 
                         key={index}
                         className="hover:bg-gray-50 transition-colors duration-200"
@@ -185,7 +201,7 @@ export default function Results() {
         {/* Mobile Card View (Hidden on desktop) */}
         {!isLoading && getResults && getResults.length > 0 && (
           <div className="md:hidden mt-6 space-y-4">
-            {getResults.map((result: any, index: number) => (
+            {getResults.map((result: QuizResult, index: number) => (
               <div 
                 key={index}
                 className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200"

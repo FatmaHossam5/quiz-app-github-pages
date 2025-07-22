@@ -4,18 +4,10 @@ import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { baseUrl } from "../../../ApiUtils/ApiUtils";
+import { RootState, Group } from "../../../types";
 import Loading from "../../../Shared/Loading/Loading";
 import { quiz } from "../SpecificQuiz/SpecificQuiz";
 import "./QuizModal.css";
-
-interface Group {
-  students: [string];
-  status: string;
-  name: string;
-  max_students: string;
-  instructor: string;
-  _id: string;
-}
 
 interface QuizModalProp {
   quiz?: quiz;
@@ -48,8 +40,8 @@ interface formData {
 }
 
 export default function QuizModal({ setModalState, setCode, quiz, handleClose }: QuizModalProp) {
-  let { groups } = useSelector((state: any) => state.groups);
-  const { headers } = useSelector((state: any) => state.userData);
+  const { groups } = useSelector((state: RootState) => state.groups);
+  const { headers } = useSelector((state: RootState) => state.userData);
   const [isLoading, setIsLoading] = useState(false);
 
   const durationAndQuestionNumber: number[] = [
@@ -70,20 +62,20 @@ export default function QuizModal({ setModalState, setCode, quiz, handleClose }:
     handleSubmit,
     formState: { errors },
     setValue,
-  } = useForm();
+  } = useForm<formData>();
 
   useEffect(() => {
     if (quiz) {
       for (const key in quiz) {
-        if (quiz.hasOwnProperty(key)) {
-          const value = (quiz as any)[key];
+        if (Object.prototype.hasOwnProperty.call(quiz, key)) {
+          const value = (quiz as unknown as Record<string, unknown>)[key];
           if (typeof value === "string" || typeof value === "number") {
-            setValue(key, value);
+            setValue(key as keyof formData, value);
           }
         }
       }
     }
-  }, []);
+  }, [quiz, setValue]);
 
   const addQuiz = (data: formData) => {
     data.schadule = `${data.date}T${data.time}`;
@@ -181,19 +173,9 @@ export default function QuizModal({ setModalState, setCode, quiz, handleClose }:
         id="quizModal"
         className="space-y-6"
       >
-        {/* Header */}
-        <div className="border-b border-gray-200 pb-4">
-          <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-            <i className="fa-solid fa-file-circle-plus text-blue-600 mr-3"></i>
-            {!quiz ? "Create New Quiz" : "Edit Quiz"}
-          </h3>
-          <p className="text-gray-600 mt-1">
-            {!quiz 
-              ? "Fill in the details below to create a new quiz" 
-              : "Update the quiz details below"
-            }
-          </p>
-        </div>
+
+
+
 
         {/* Basic Information Section */}
         <div className="space-y-4">
