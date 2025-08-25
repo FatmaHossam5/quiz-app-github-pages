@@ -17,6 +17,7 @@ export default function Login() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<LoginFormData>();
   
   const onSubmit = async (data: LoginFormData) => {
@@ -25,6 +26,11 @@ export default function Login() {
     } catch (error) {
       // Error is handled by useAuth hook
     }
+  };
+
+  const fillDemoCredentials = (email: string, password: string) => {
+    setValue("email", email);
+    setValue("password", password);
   };
 
   return (
@@ -47,6 +53,57 @@ export default function Login() {
           </div>
         </Link>
         <div className="signup w-1/2"></div>
+      </div>
+
+      {/* Demo Credentials Section */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4 mb-6 border border-blue-200 dark:border-blue-700">
+        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+          <i className="fa-solid fa-flask text-blue-500 mr-2"></i>
+          Try Demo Accounts
+        </h4>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          Click on any account below to automatically fill the login form and explore the platform.
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* Instructor Demo Account */}
+          <button
+            onClick={() => fillDemoCredentials("instructor@demo.com", "12345678")}
+            className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-200 hover:shadow-md"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                  <i className="fa-solid fa-chalkboard-teacher text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">Instructor</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">instructor@demo.com</p>
+                </div>
+              </div>
+              <i className="fa-solid fa-arrow-right text-gray-400 text-sm"></i>
+            </div>
+          </button>
+
+          {/* Student Demo Account */}
+          <button
+            onClick={() => fillDemoCredentials("student@demo.com", "12345678")}
+            className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-600 hover:border-green-300 dark:hover:border-green-500 transition-all duration-200 hover:shadow-md"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                  <i className="fa-solid fa-user-graduate text-green-600 dark:text-green-400"></i>
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">Student</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">student@demo.com</p>
+                </div>
+              </div>
+              <i className="fa-solid fa-arrow-right text-gray-400 text-sm"></i>
+            </div>
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="my-12">

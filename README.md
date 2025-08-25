@@ -17,6 +17,22 @@ A modern, feature-rich quiz application built with React, TypeScript, and Redux.
 - ✅ **Progress Tracking** - View completed and upcoming quizzes
 - ✅ **Results Dashboard** - Detailed performance analytics
 
+## 🎯 **Demo Accounts**
+
+To help you explore the platform, we've provided demo accounts for both user roles:
+
+### **Instructor Account**
+- **Email**: `instructor@demo.com`
+- **Password**: `12345678`
+- **Features**: Full access to quiz creation, question management, student management, and results analysis
+
+### **Student Account**
+- **Email**: `student@demo.com`
+- **Password**: `12345678`
+- **Features**: Quiz taking, progress tracking, and results viewing
+
+> 💡 **Pro Tip**: Use these demo accounts to experience both sides of the platform. Log out and switch between accounts to explore different user roles!
+
 ## 🛠️ **Tech Stack**
 
 - **Frontend**: React 18 + TypeScript

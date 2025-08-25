@@ -105,6 +105,18 @@ class GlobalErrorHandler {
     // Monitor fetch requests
     const originalFetch = window.fetch;
     window.fetch = async (...args) => {
+      const url = Array.isArray(args) ? args[0] : 'unknown';
+      
+      // Skip API requests to avoid interfering with them
+      if (typeof url === 'string' && (
+        url.includes('upskilling-egypt.com') || 
+        url.includes('/api/') ||
+        url.startsWith('https://') ||
+        url.startsWith('http://')
+      )) {
+        return originalFetch(...args);
+      }
+      
       try {
         const response = await originalFetch(...args);
         
